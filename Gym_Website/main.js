@@ -1,3 +1,11 @@
+if (history.scrollRestoration) {
+    history.scrollRestoration = 'manual';
+}
+
+// 2. Ép cuộn về 0 ngay khi tải xong
+window.onload = function() {
+    window.scrollTo(0, 0);
+}
 const menuBtn = document.getElementById("menu-btn");
 const navLinks = document.getElementById("nav-links");
 const menuBtnIcon = menuBtn.querySelector("i");
@@ -70,9 +78,9 @@ const swiper = new Swiper(".swiper", {
   
     pagination: {
       el: ".swiper-pagination",
+      clickable: true,
     },
-  });
-
+  });  
   //Tính cân nặng chiều cao 
   bmiBtn.addEventListener("click", () => {
     const height = parseInt(document.getElementById("height").value);
@@ -126,3 +134,4 @@ const swiper = new Swiper(".swiper", {
       message => alert(message)
     );
   }
+  

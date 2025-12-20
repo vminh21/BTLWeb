@@ -868,3 +868,22 @@ url("assets/banner-2.png");
     padding: 2rem;
   }
 }
+/* --- STYLE CHO TRANG CHI TIẾT (Detail Page) --- */
+.detail__grid {
+  display: grid;
+  gap: 2rem;
+}
+
+/* Giao diện trên máy tính (chia 2 cột: 2 phần nội dung - 1 phần sidebar) */
+@media (width > 768px) {
+  .detail__grid {
+    grid-template-columns: 2fr 1fr; 
+    align-items: start;
+  }
+}
+
+/* Sidebar bên phải */
+.sidebar__card ul li a:hover {
+  color: var(--primary-color) !important;
+  margin-left: 5px; /* Hiệu ứng dịch chuyển nhẹ khi di chuột */
+}
