@@ -115,7 +115,7 @@ $recent_transactions = $conn->query($sql_recent);
             <li><a href="#"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
             <li><a href="#"><i class='bx bxs-bell'></i> Thông báo</a></li>
             <li><a href="#"><i class='bx bxs-report'></i> Báo cáo</a></li>
-            <li><a href="logout.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
+            <li><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
     </div>
 

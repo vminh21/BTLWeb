@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -6,7 +10,7 @@
         <link href="URLjs/remixicon.css" rel="stylesheet"/>
         <link rel="stylesheet" href="URLjs/swiper-bundle.min.css"/>
         <link rel="stylesheet" href="URLjs/font-awesome.min.css">
-        <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" href="style.css?v=<?php echo time(); ?>">
         <title>FitPhysique</title>
     </head>
     <body>
@@ -28,8 +32,27 @@
             <li><a href="#client">CLIENT</a></li>
             <li><a href="#blog">BLOG</a></li>
             <li><a href="#contact">CONTACT</a></li>
-            <li><a href="Form_Login_Logout/login.php" class="nav__login">ĐĂNG NHẬP</a></li>
-        </ul>
+            
+            <?php if (isset($_SESSION['full_name'])): ?>
+                
+                <li class="user-info-box">
+                    <span style="color: white; font-weight: 600;">
+                        Xin chào, <?php echo $_SESSION['full_name']; ?>
+                    </span>
+                    
+                    <a href="QL_Members/profile.php" class="btn-profile">Hồ sơ</a>
+                    
+                    <a href="Form_Login_Logout/logout.php" title="Đăng xuất" style="color: #ccc;">
+                        <i class="ri-logout-box-r-line"></i>
+                    </a>
+                </li>
+
+            <?php else: ?>
+
+                <li><a href="Form_Login_Logout/login.php" class="nav__login">ĐĂNG NHẬP</a></li>
+
+            <?php endif; ?>
+            </ul>
     </div>
 </nav>
         <header class="header" id="header">
@@ -271,11 +294,8 @@
 
         <section class="section__container client__container" id="client">
           <h2 class="section__header">OUR TESTIMONIALS</h2>
-          <!-- Slider main container -->
           <div class="swiper">
-            <!-- Additional required wrapper -->
             <div class="swiper-wrapper">
-              <!-- Slides -->
               <div class="swiper-slide">
                 <div class="client__card">
                   <img src="assets/client-1.jpg" alt="client" />
@@ -315,7 +335,6 @@
                 </div>
               </div>
             </div>
-            <!-- If we need pagination -->
             <div class="swiper-pagination"></div>
           </div>
         </section>
@@ -432,7 +451,7 @@
             Copyright © 2024 Web Design Mastery. All rights reserved.
           </div>
         </footer>
-       
+        
     
         
         <script src="URLjs/scrollreveal.js"></script>

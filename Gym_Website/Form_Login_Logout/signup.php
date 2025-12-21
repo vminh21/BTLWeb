@@ -102,38 +102,9 @@ $conn->close();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign Up - FitPhysique</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=<?php echo time(); ?>">
   <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
   
-  <style>
-    /* CSS THÔNG BÁO TOAST */
-    #toast-box {
-        position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
-        background: #fff; padding: 15px 25px; border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        display: flex; align-items: center; gap: 10px;
-        font-size: 16px; font-weight: 500; z-index: 1000;
-        transition: top 0.5s ease-in-out; min-width: 300px; justify-content: center;
-    }
-    #toast-box.show { top: 30px; }
-    .toast-error { border-left: 5px solid #ff4d4d; color: #ff4d4d; }
-    .toast-error i { font-size: 24px; }
-    .toast-success { border-left: 5px solid #2ecc71; color: #2ecc71; }
-    .toast-success i { font-size: 24px; }
-
-    /* --- CSS CHO COMBOBOX (SELECT) --- */
-    .input-box select {
-        width: 100%; height: 100%;
-        background: rgba(255, 255, 255, 0.7);
-        border: none; outline: none;
-        border-radius: 40px; font-size: 16px;
-        color: #333; padding: 0 45px 0 20px; 
-        appearance: none; -webkit-appearance: none; -moz-appearance: none;
-        cursor: pointer;
-    }
-    .input-box select:focus { background: #fff; }
-    .input-box select:invalid { color: gray; }
-  </style>
 </head>
 <body>
 
@@ -211,18 +182,6 @@ $conn->close();
     </form>
   </div>
 
-  <script>
-    const toastBox = document.getElementById('toast-box');
-    if (toastBox) {
-        setTimeout(() => { toastBox.classList.add('show'); }, 100);
-        setTimeout(() => { toastBox.classList.remove('show'); }, 3000);
-    }
-  </script>
-  <script>
-    // Chặn hành vi "Confirm Form Resubmission" khi F5
-    if ( window.history.replaceState ) {
-        window.history.replaceState( null, null, window.location.href );
-    }
-  </script>
+  <script src="reset.js"></script>
 </body>
 </html>
