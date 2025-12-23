@@ -2,22 +2,22 @@
 $blogs = [
     1 => [
         "title" => "Fueling Your Body for Optimal Performance",
-        "image" => "assets/blog-1.jpg",
+        "image" => "../assets/blog-1.jpg",
         "desc" => "Bài viết về dinh dưỡng giúp tối ưu hiệu suất tập luyện..."
     ],
     2 => [
         "title" => "A Guide to Setting and Achieving Fitness Goals",
-        "image" => "assets/blog-2.jpg",
+        "image" => "../assets/blog-2.jpg",
         "desc" => "Hướng dẫn đặt mục tiêu và đạt được mục tiêu thể hình..."
     ],
     3 => [
         "title" => "Tips and Techniques for Efficient Exercise",
-        "image" => "assets/blog-3.jpg",
+        "image" => "../assets/blog-3.jpg",
         "desc" => "Mẹo và kỹ thuật tập luyện hiệu quả hơn..."
     ],
     4 => [
         "title" => "A Beginner's Guide to Starting Your Running Journey",
-        "image" => "assets/blog-4.jpg",
+        "image" => "../assets/blog-4.jpg",
         "desc" => "Hướng dẫn cho người mới bắt đầu chạy bộ..."
     ],
 ];
@@ -69,7 +69,7 @@ $blogs = [
 <body>
 
 <div class="viewall__container">
-    <a href="index.php#blog" class="back-home">← Quay lại Trang chủ</a>
+    <a href="../index.php#blog" class="back-home">← Quay lại Trang chủ</a>
     
     <div class="header__title">
         <h2>TẤT CẢ BÀI VIẾT</h2>

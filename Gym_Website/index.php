@@ -1,15 +1,14 @@
 <?php
 session_start();
 // if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-//     // Nếu là Admin, chuyển hướng ngay lập tức sang trang quản trị
-//     header("Location: Form_Login_Logout/Login.php");
-//     exit(); 
+//     // Nếu là Admin, chuyển hướng ngay lập tức sang trang quản trị
+//     header("Location: Form_Login_Logout/Login.php");
+//     exit(); 
 // }
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
-    <head>
+<html lang="vi"> <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="URLjs/remixicon.css" rel="stylesheet"/>
@@ -65,7 +64,7 @@ session_start();
                 <div class="header__content">
                     <h1>HARD WORK</h1>
                     <h2>ISS FOR EVERY SUCCESS</h2>
-                    <p>Start by taking inspirations, continue it to give inspirations</p>
+                    <p>Bắt đầu bằng việc lấy cảm hứng, tiếp tục để truyền cảm hứng.</p>
                     <div class="header__btn">
                         <button class="btn btn__primary" id="btn-login">GET STARTED</button>
                     </div>
@@ -77,31 +76,26 @@ session_start();
             <div class="about__header">
             <h2 class="section__header">ABOUT US</h2>
             <p class="section__description">
-                Our mission is to inspire and support individuals in achieving their
-                health and wellness goals, regardless of their fitness level or
-                background. 
+                Sứ mệnh của chúng tôi là truyền cảm hứng và hỗ trợ mọi người đạt được các mục tiêu về sức khỏe và thể chất, bất kể trình độ hay nền tảng của họ.
             </p>
             </div>
             <div class="about__grid">
             <div class="about__card">
              <h4>WINNER COACHES</h4>
              <p>
-                We pride ourselves on having a team of dedicated and experienced
-                coaches who are committed to helping you succeed.
+                Chúng tôi tự hào sở hữu đội ngũ huấn luyện viên tận tâm và giàu kinh nghiệm, cam kết giúp bạn thành công.
              </p>
             </div>
             <div class="about__card">
                 <h4>AFFORDABLE PRICE</h4>
                 <p>
-                    We believe that everyone should have access to high-quality fitness
-                    facilities without breaking the bank.
+                    Chúng tôi tin rằng mọi người đều xứng đáng được tiếp cận các cơ sở tập luyện chất lượng cao với mức giá hợp lý.
                 </p>
                </div>
                <div class="about__card">
                 <h4>MODERN EQUIPMENTS</h4>
                 <p>
-                    Stay ahead of the curve with our state-of-the-art equipment designed
-                    to elevate your workout experience.
+                    Luôn dẫn đầu xu hướng với các trang thiết bị hiện đại được thiết kế để nâng cao trải nghiệm tập luyện của bạn.
                 </p>
                </div>
             </div>
@@ -111,41 +105,37 @@ session_start();
             <div class="session__card">
                 <h4>BODY BUILDING</h4>
                 <p>
-                  Sculpt your physique and build muscle mass with our specialized
-                  bodybuilding programs at FitPhysique.
+                 Kiến tạo vóc dáng và xây dựng khối lượng cơ bắp với các chương trình thể hình chuyên biệt tại FitPhysique.
                 </p>
                 <button class="btn btn__secondary">
-                  READ MORE <i class="ri-arrow-right-line"></i>
+                 READ MORE <i class="ri-arrow-right-line"></i>
                 </button>
               </div>
               <div class="session__card">
                 <h4>CARDIO</h4>
                 <p>
-                  Elevate your heart rate and boost your endurance with our dynamic
-                  cardio workouts at FitPhysique.
+                 Tăng nhịp tim và cải thiện sức bền với các bài tập cardio năng động tại FitPhysique.
                 </p>
                 <button class="btn btn__secondary">
-                  READ MORE <i class="ri-arrow-right-line"></i>
+                 READ MORE <i class="ri-arrow-right-line"></i>
                 </button>
               </div>
               <div class="session__card">
                 <h4>FITNESS</h4>
                 <p>
-                  Embrace a holistic approach to fitness with our comprehensive fitness
-                  programs at FitPhysique.
+                 Tiếp cận thể dục toàn diện với các chương trình fitness phong phú và đa dạng tại FitPhysique.
                 </p>
                 <button class="btn btn__secondary">
-                  READ MORE <i class="ri-arrow-right-line"></i>
+                 READ MORE <i class="ri-arrow-right-line"></i>
                 </button>
               </div>
               <div class="session__card">
                 <h4>CROSSFIT</h4>
                 <p>
-                  Experience the ultimate full-body workout with our intense CrossFit
-                  classes at FitPhysique.
+                 Trải nghiệm bài tập toàn thân đỉnh cao với các lớp CrossFit cường độ cao tại FitPhysique.
                 </p>
                 <button class="btn btn__secondary">
-                  READ MORE <i class="ri-arrow-right-line"></i>
+                 READ MORE <i class="ri-arrow-right-line"></i>
                 </button>
               </div>
         </section>
@@ -156,7 +146,7 @@ session_start();
                 <div class="trainer__card">
                     <img src="assets/trainer-1.jpg" alt="trainer" />
                     <h4>DAVID WILLIAMS</h4>
-                    <p>Body Builder Coach</p>
+                    <p>HLV Thể Hình</p>
                     <div class="trainer__socials">
                       <a href="#"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
@@ -166,7 +156,7 @@ session_start();
                   <div class="trainer__card">
                     <img src="assets/trainer-2.jpg" alt="trainer" />
                     <h4>ROSY RIVERA</h4>
-                    <p>Cardio Coach</p>
+                    <p>HLV Cardio</p>
                     <div class="trainer__socials">
                       <a href="#"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
@@ -176,7 +166,7 @@ session_start();
                   <div class="trainer__card">
                     <img src="assets/trainer-3.jpg" alt="trainer" />
                     <h4>MATT STONIE</h4>
-                    <p>Fitness Coach</p>
+                    <p>HLV Fitness</p>
                     <div class="trainer__socials">
                       <a href="#"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
@@ -186,7 +176,7 @@ session_start();
                   <div class="trainer__card">
                     <img src="assets/trainer-4.jpg" alt="trainer" />
                     <h4>SOFIA LAUREN</h4>
-                    <p>Crossfit Coach</p>
+                    <p>HLV Crossfit</p>
                     <div class="trainer__socials">
                       <a href="#"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
@@ -204,14 +194,14 @@ session_start();
             <div class="membership__card">
                 <h4>STANDARD</h4>
                 <ul>
-                    <li><span><i class="ri-check-line"></i></span> Gym floor access and standard equipment.</li>
-                    <li><span><i class="ri-check-line"></i></span> Group fitness classes: yoga, Zumba, Pilates.</li>
-                    <li><span><i class="ri-check-line"></i></span> Complimentary fitness consultations.</li>
-                    <li><span><i class="ri-check-line"></i></span> Locker room and showers.</li>
-                    <li><span><i class="ri-check-line"></i></span> Nutritional guidance and snacks.</li>
-                    <li><span><i class="ri-check-line"></i></span> Member discounts on merchandise.</li>
+                    <li><span><i class="ri-check-line"></i></span> Truy cập sàn tập và thiết bị tiêu chuẩn.</li>
+                    <li><span><i class="ri-check-line"></i></span> Các lớp tập nhóm: Yoga, Zumba, Pilates.</li>
+                    <li><span><i class="ri-check-line"></i></span> Tư vấn thể hình miễn phí.</li>
+                    <li><span><i class="ri-check-line"></i></span> Phòng thay đồ và phòng tắm.</li>
+                    <li><span><i class="ri-check-line"></i></span> Hướng dẫn dinh dưỡng và đồ ăn nhẹ.</li>
+                    <li><span><i class="ri-check-line"></i></span> Giảm giá hàng hóa cho hội viên.</li>
                 </ul>
-                <h3><sup>$</sup>500000<span>/MONTH</span></h3>
+                <h3><sup>$</sup>500000<span>/THÁNG</span></h3>
                 
                 <a href="Form_Login_Logout/checkout.php?package_id=1" class="btn btn__primary">BUY NOW</a>
             </div>
@@ -219,14 +209,14 @@ session_start();
             <div class="membership__card">
                 <h4>PROFESSIONAL</h4>
                 <ul>
-                    <li><span><i class="ri-check-line"></i></span> Standard Membership facilities included.</li>
-                    <li><span><i class="ri-check-line"></i></span> Priority booking for personal training.</li>
-                    <li><span><i class="ri-check-line"></i></span> Access to advanced equipment.</li>
-                    <li><span><i class="ri-check-line"></i></span> Complimentary fitness consultations.</li>
-                    <li><span><i class="ri-check-line"></i></span> Exclusive member events and workshops.</li>
-                    <li><span><i class="ri-check-line"></i></span> Discounts on additional services.</li>
+                    <li><span><i class="ri-check-line"></i></span> Bao gồm mọi quyền lợi gói Standard.</li>
+                    <li><span><i class="ri-check-line"></i></span> Ưu tiên đặt lịch huấn luyện cá nhân.</li>
+                    <li><span><i class="ri-check-line"></i></span> Truy cập khu vực thiết bị nâng cao.</li>
+                    <li><span><i class="ri-check-line"></i></span> Tư vấn thể hình miễn phí.</li>
+                    <li><span><i class="ri-check-line"></i></span> Tham gia sự kiện và workshop độc quyền.</li>
+                    <li><span><i class="ri-check-line"></i></span> Giảm giá cho các dịch vụ bổ sung.</li>
                 </ul>
-                <h3><sup>$</sup>1350000<span>/3MONTH</span></h3>
+                <h3><sup>$</sup>1350000<span>/3 THÁNG</span></h3>
                 
                 <a href="Form_Login_Logout/checkout.php?package_id=2" class="btn btn__primary">BUY NOW</a>
             </div>
@@ -234,14 +224,14 @@ session_start();
             <div class="membership__card">
                 <h4>ULTIMATE</h4>
                 <ul>
-                    <li><span><i class="ri-check-line"></i></span> Standard and Professional facilities included.</li>
-                    <li><span><i class="ri-check-line"></i></span> Unlimited access to premium amenities.</li>
-                    <li><span><i class="ri-check-line"></i></span> Reserved parking or valet service.</li>
-                    <li><span><i class="ri-check-line"></i></span> Complimentary premium fitness classes.</li>
-                    <li><span><i class="ri-check-line"></i></span> Customized workout plans.</li>
-                    <li><span><i class="ri-check-line"></i></span> Priority access to guest passes and events.</li>
+                    <li><span><i class="ri-check-line"></i></span> Bao gồm quyền lợi gói Standard và Professional.</li>
+                    <li><span><i class="ri-check-line"></i></span> Truy cập không giới hạn tiện ích cao cấp.</li>
+                    <li><span><i class="ri-check-line"></i></span> Chỗ đậu xe riêng hoặc dịch vụ đỗ xe.</li>
+                    <li><span><i class="ri-check-line"></i></span> Các lớp học thể hình cao cấp miễn phí.</li>
+                    <li><span><i class="ri-check-line"></i></span> Kế hoạch tập luyện cá nhân hóa.</li>
+                    <li><span><i class="ri-check-line"></i></span> Quyền ưu tiên vé khách mời và sự kiện.</li>
                 </ul>
-                <h3><sup>$</sup>5000000<span>/YEAR</span></h3>
+                <h3><sup>$</sup>5000000<span>/NĂM</span></h3>
                 
                 <a href="Form_Login_Logout/checkout.php?package_id=3" class="btn btn__primary">BUY NOW</a>
             </div>
@@ -259,10 +249,7 @@ session_start();
                   <img src="assets/client-1.jpg" alt="client" />
                   <div><i class="ri-double-quotes-r"></i></div>
                   <p>
-                    I've been a member at FitPhysique for over a year now, and I
-                    couldn't be happier with my experience. The range of classes
-                    offered here is impressive - from high-energy cardio sessions to
-                    relaxing yoga classes, there's something for everyone.
+                    Tôi đã là hội viên tại FitPhysique hơn một năm nay và cực kỳ hài lòng với trải nghiệm của mình. Các lớp học ở đây rất ấn tượng - từ những buổi cardio năng lượng cao đến các lớp yoga thư giãn, có đủ mọi thứ cho mọi người.
                   </p>
                   <h4>Sarah Johnson</h4>
                 </div>
@@ -272,10 +259,7 @@ session_start();
                   <img src="assets/client-2.jpg" alt="client" />
                   <div><i class="ri-double-quotes-r"></i></div>
                   <p>
-                    The classes are always well-planned and engaging, and the
-                    instructors do an excellent job of keeping us motivated
-                    throughout. I'm so grateful to have found such a supportive and
-                    inclusive gym.
+                    Các lớp học luôn được lên kế hoạch kỹ lưỡng và hấp dẫn, các huấn luyện viên làm rất tốt việc giữ động lực cho chúng tôi trong suốt buổi tập. Tôi rất biết ơn vì đã tìm thấy một phòng tập hỗ trợ và hòa đồng như vậy.
                   </p>
                   <h4>Michael Wong</h4>
                 </div>
@@ -285,9 +269,7 @@ session_start();
                   <img src="assets/client-3.jpg" alt="client" />
                   <div><i class="ri-double-quotes-r"></i></div>
                   <p>
-                    I've tried many gyms in the past, but none of them compare to
-                    FitPhysique. From the moment I walked through the doors, I felt
-                    welcomed and supported by the staff and fellow members alike.
+                    Tôi đã thử nhiều phòng tập trước đây, nhưng không đâu sánh bằng FitPhysique. Ngay từ khoảnh khắc bước qua cánh cửa, tôi đã cảm thấy được chào đón và hỗ trợ bởi đội ngũ nhân viên cũng như các hội viên khác.
                   </p>
                   <h4>Emily Davis</h4>
                 </div>
@@ -298,45 +280,55 @@ session_start();
         </section>
 
         <section class="blog" id="blog">
-          <div class="section__container blog__container">
-            <h2 class="section__header">BLOGS</h2>
-            <div class="blog__grid">
-              <div class="blog__card">
-                <img src="assets/blog-1.jpg" alt="blog" />
-                <h4>Fueling Your Body for Optimal Performance</h4>
-              </div>
-              <div class="blog__card">
-                <img src="assets/blog-2.jpg" alt="blog" />
-                <h4>A Guide to Setting and Achieving Fitness Goals</h4>
-              </div>
-              <div class="blog__card">
-                <img src="assets/blog-3.jpg" alt="blog" />
-                <h4>Tips and Techniques for Efficient Exercise</h4>
-              </div>
-              <div class="blog__card">
-                <img src="assets/blog-4.jpg" alt="blog" />
-                <h4>A Beginner's Guide to Starting Your Running Journey</h4>
-              </div>
-            </div>
-            <div class="blog__btn">
-              <a href="hehe.php" class="btn btn__primary">VIEW ALL</a>
-            </div>
-          </div>
-        </section>
+  <div class="section__container blog__container">
+    <h2 class="section__header">LATEST BLOGS</h2> <div class="blog__grid">
+
+      <a href="Hiep_Folder/blog-detail.php?id=1" class="blog__card">
+        <img src="assets/blog-1.jpg" alt="blog" />
+        <h4>Dinh dưỡng tối ưu cho hiệu suất tập luyện</h4>
+        <p>Bí quyết nạp năng lượng đúng cách trước và sau khi tập.</p>
+      </a>
+
+      <a href="Hiep_Folder/blog-detail.php?id=2" class="blog__card">
+        <img src="assets/blog-2.jpg" alt="blog" />
+        <h4>Hướng dẫn đặt mục tiêu Fitness thông minh</h4>
+        <p>Cách áp dụng nguyên tắc SMART để đạt được vóc dáng mơ ước.</p>
+      </a>
+
+      <a href="Hiep_Folder/blog-detail.php?id=3" class="blog__card">
+        <img src="assets/blog-3.jpg" alt="blog" />
+        <h4>Kỹ thuật tập luyện hiệu quả cho người bận rộn</h4>
+        <p>Tối ưu hóa thời gian với các phương pháp tập cường độ cao.</p>
+      </a>
+
+      <a href="Hiep_Folder/blog-detail.php?id=4" class="blog__card">
+        <img src="assets/blog-4.jpg" alt="blog" />
+        <h4>Cẩm nang chạy bộ cho người mới bắt đầu</h4>
+        <p>Những lưu ý quan trọng để bắt đầu hành trình chạy bộ an toàn.</p>
+      </a>
+
+    </div>
+
+    <div class="blog__btn">
+      <a href="Hiep_Folder/viewall.php" class="btn btn__primary">VIEW ALL</a>
+    </div>
+
+  </div>
+</section>
 
         <section class="section__container bmi__container">
             
             <div class="wrapper">
             <h2 class="bmi__header">BMI CALCULATOR</h2>
-            <p>Height in CM:
+            <p>Chiều cao (CM):
                 <input type="text" id="height"><br><span id="height_error"></span>
             </p>
     
-            <p>Weight in KG:
+            <p>Cân nặng (KG):
                 <input type="text" id="weight"><br><span id="weight_error"></span>
             </p>
     
-            <button class="btn" id="btn">Calculate</button>
+            <button class="btn" id="btn">CALCULATE</button>
             <p id="output"></p>
           </div>
         </section>
@@ -348,14 +340,13 @@ session_start();
                 <a href="#"><img src="assets/logo.png" alt="logo" /></a>
               </div>
               <p>
-                Welcome to FitPhysique, where we believe that every journey to
-                fitness is unique and empowering.
+                Chào mừng đến với FitPhysique, nơi chúng tôi tin rằng mỗi hành trình đến với thể hình đều độc đáo và đầy sức mạnh.
               </p>
               <ul class="footer__links">
                 <li>
                   <a href="#">
                     <span><i class="ri-map-pin-2-fill"></i></span>
-                    123 Main Street<br />Sunrise Valley, Evergreen Heights
+                    123 Đường Chính<br />Sunrise Valley, Evergreen Heights
                   </a>
                 </li>
                 <li>
@@ -389,13 +380,12 @@ session_start();
             <div class="footer__col">
               <h4>NEWSLETTER</h4>
               <p>
-                Don't miss out on the latest news and offers - sign up today and
-                join our thriving fitness community!
+                Đừng bỏ lỡ những tin tức và ưu đãi mới nhất - đăng ký ngay hôm nay và tham gia cộng đồng thể hình thịnh vượng của chúng tôi!
               </p>
               <form onsubmit="sendEmail(); reset(); return false;">
-                <input type="text" id="name" placeholder="Enter Name" />
-                <input type="text" id="email" placeholder="Enter Email" />
-                <input type="text" id="phone" placeholder="Enter Phone no." />
+                <input type="text" id="name" placeholder="Nhập tên" />
+                <input type="text" id="email" placeholder="Nhập Email" />
+                <input type="text" id="phone" placeholder="Nhập SĐT" />
                 <button type="submit" class="btn btn__primary">SEND</button>
               </form>
               <div class="footer__socials">

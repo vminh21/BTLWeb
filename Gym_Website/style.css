@@ -434,6 +434,13 @@ nav {
   padding: 1rem;
   background-color: rgba(0, 0, 0, 0.6);
   transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.membership__card .btn {
+  width: 100%; 
+  text-align: center;
 }
 
 .membership__card:hover {
@@ -478,6 +485,7 @@ nav {
   font-weight: 400;
   font-family: var(--header-font);
   color: var(--white);
+  margin-top: auto;
 }
 
 .membership__card h3 :is(sup, span) {

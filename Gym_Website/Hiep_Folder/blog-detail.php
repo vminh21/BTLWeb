@@ -314,7 +314,7 @@ $blog = $blogs[$id] ?? $blogs[1];
 <body>
 
 <div class="container">
-    <a href="index.php" class="back-btn">← Quay lại</a>
+    <a href="../index.php" class="back-btn">← Quay lại</a>
     
     <h1><?php echo htmlspecialchars($blog['title']); ?></h1>
     <p><?php echo htmlspecialchars($blog['content']); ?></p>
