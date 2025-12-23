@@ -7,7 +7,7 @@ if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
 $conn->set_charset("utf8mb4");
 
 // 2. KIỂM TRA QUYỀN TRUY CẬP
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['member_id']) || $_SESSION['role'] !== 'admin') {
     exit("Bạn không có quyền thực hiện hành động này.");
 }
 

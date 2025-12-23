@@ -2,15 +2,15 @@
 session_start();
 
 // 1. KIỂM TRA BẢO MẬT
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.php");
     exit();
 }
 
 // 2. KẾT NỐI DATABASE
-$conn = new mysqli("localhost", "root", "", "gymmanagement");
+$conn = new mysqli("localhost", "root", "", "GymManagement");
 if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
-$conn->set_charset("utf8mb4");
+$conn->set_charset("utf8");
 
 // 3. LẤY DỮ LIỆU THỐNG KÊ
 $total_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM transactions")->fetch_row()[0] ?? 0;
