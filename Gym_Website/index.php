@@ -40,7 +40,7 @@ session_start();
                         Xin chào, <?php echo $_SESSION['full_name']; ?>
                     </span>
                     
-                    <a href="QL_Members/profile.php" class="btn-profile">Hồ sơ</a>
+                    <a href="QL_Profile/member_profile.php" class="btn-profile">Hồ sơ</a>
                     
                     <a href="Form_Login_Logout/logout.php" title="Đăng xuất" style="color: #ccc;">
                         <i class="ri-logout-box-r-line"></i>
@@ -314,7 +314,7 @@ session_start();
               </div>
             </div>
             <div class="blog__btn">
-              <button class="btn btn__primary">VIEW ALL</button>
+              <a href="hehe.php" class="btn btn__primary">VIEW ALL</a>
             </div>
           </div>
         </section>
