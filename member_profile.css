@@ -290,6 +290,7 @@ header p { color: var(--text-muted); margin-top: 5px; }
     font-size: 2rem;
     margin: 0 0 1.5rem;
     color: var(--text-main);
+    width: max-content;
     font-weight: 700;
 }
 .card-header h3 span { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
