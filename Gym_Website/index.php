@@ -1,5 +1,10 @@
 <?php
 session_start();
+// if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+//     // Nếu là Admin, chuyển hướng ngay lập tức sang trang quản trị
+//     header("Location: Form_Login_Logout/Login.php");
+//     exit(); 
+// }
 ?>
 
 <!DOCTYPE html>

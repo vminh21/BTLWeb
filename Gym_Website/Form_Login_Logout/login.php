@@ -4,27 +4,45 @@ require_once 'connectdb.php';
 
 $error_message = "";
 
+// --- 1. CÁC HÀM HỖ TRỢ XỬ LÝ COOKIE (MULTI-ACCOUNT) ---
+function getSavedAccounts() {
+    if (isset($_COOKIE['saved_accounts'])) {
+        return json_decode($_COOKIE['saved_accounts'], true) ?? [];
+    }
+    return [];
+}
+
+function saveAccountToCookie($username, $password) {
+    $accounts = getSavedAccounts();
+    $accounts[$username] = $password; // Thêm hoặc cập nhật pass
+    setcookie('saved_accounts', json_encode($accounts), time() + (86400 * 30), "/");
+}
+
+function removeAccountFromCookie($username) {
+    $accounts = getSavedAccounts();
+    if (isset($accounts[$username])) {
+        unset($accounts[$username]); // Xóa user này khỏi danh sách
+        setcookie('saved_accounts', json_encode($accounts), time() + (86400 * 30), "/");
+    }
+}
+// -----------------------------------------------------
+
 // XỬ LÝ KHI FORM ĐƯỢC SUBMIT
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $input_user = isset($_POST['username']) ? trim($_POST['username']) : '';
     $input_pass = isset($_POST['password']) ? trim($_POST['password']) : '';
+    $remember   = isset($_POST['remember_me']); // Kiểm tra checkbox
 
-    // --- 1. VALIDATE DỮ LIỆU ĐẦU VÀO (TRIỆT ĐỂ) ---
-    
-    // Trường hợp 1: Không nhập gì cả
+    // VALIDATE
     if (empty($input_user) && empty($input_pass)) {
         $error_message = "Vui lòng nhập đầy đủ Tài khoản và Mật khẩu!";
-    } 
-    // Trường hợp 2: Nhập pass rồi mà quên nhập user
-    elseif (empty($input_user)) {
+    } elseif (empty($input_user)) {
         $error_message = "Vui lòng nhập Email";
-    }
-    // Trường hợp 3: Nhập user rồi mà quên nhập pass
-    elseif (empty($input_pass)) {
+    } elseif (empty($input_pass)) {
         $error_message = "Vui lòng nhập Mật khẩu!";
-    }
+    } 
     
-    // --- 2. NẾU ĐỦ DỮ LIỆU THÌ MỚI CHECK DB ---
+    // CHECK DB
     else {
         $safe_user = $conn->real_escape_string($input_user);
         $safe_pass = $conn->real_escape_string($input_pass);
@@ -33,33 +51,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $sql_admin = "SELECT * FROM admins WHERE username = '$safe_user' AND password = '$safe_pass'";
         $result_admin = $conn->query($sql_admin);
 
+        // B. Check Member
+        $sql_member = "SELECT * FROM members WHERE email = '$safe_user' AND password = '$safe_pass'";
+        $result_member = $conn->query($sql_member);
+
+        $login_success = false;
+        $redirect_url = "";
+
+        // Logic Admin
         if ($result_admin->num_rows > 0) {
             $row = $result_admin->fetch_assoc();
-            $_SESSION['admin_id'] = $row['admin_id'];
+            $_SESSION['admin_id']  = $row['admin_id']; // QUAN TRỌNG: Lưu ID Admin
             $_SESSION['full_name'] = $row['full_name'];
-            $_SESSION['role'] = 'admin';
-            header("Location: ../QL_Members/admin_dashboard.php");
-            exit();
-        } else {
-            // B. Check Member
-            $sql_member = "SELECT * FROM members WHERE email = '$safe_user' AND password = '$safe_pass'";
-            $result_member = $conn->query($sql_member);
+            $_SESSION['role']      = 'admin';
+            $redirect_url          = "../QL_Members/admin_dashboard.php";
+            $login_success         = true;
+        } 
+        // Logic Member
+        elseif ($result_member->num_rows > 0) {
+            $row = $result_member->fetch_assoc();
+            $_SESSION['member_id'] = $row['member_id']; // QUAN TRỌNG: Lưu ID Member
+            $_SESSION['full_name'] = $row['full_name'];
+            $_SESSION['role']      = 'member';
+            $redirect_url          = "../index.php";
+            $login_success         = true;
+        } 
+        else {
+            $error_message = "Tài khoản hoặc mật khẩu không chính xác!";
+        }
 
-            if ($result_member->num_rows > 0) {
-                $row = $result_member->fetch_assoc();
-                $_SESSION['member_id'] = $row['member_id'];
-                $_SESSION['full_name'] = $row['full_name'];
-                $_SESSION['role'] = 'member';
-                header("Location: ../index.php");
-                exit();
+        // Xử lý Cookie sau khi Login thành công
+        if ($login_success) {
+            if ($remember) {
+                saveAccountToCookie($input_user, $input_pass);
             } else {
-                // C. SAI TÀI KHOẢN HOẶC MẬT KHẨU
-                $error_message = "Tài khoản hoặc mật khẩu không chính xác!";
+                removeAccountFromCookie($input_user);
             }
+            header("Location: " . $redirect_url);
+            exit();
         }
     }
 }
 $conn->close();
+
+// --- CHUẨN BỊ DỮ LIỆU ĐỂ JS AUTO-FILL ---
+$saved_accounts = getSavedAccounts();
+$json_accounts_for_js = json_encode($saved_accounts);
 ?>
 
 <!DOCTYPE html>
@@ -80,25 +117,31 @@ $conn->close();
   <?php endif; ?>
 
   <div class="wrapper">
-    <form action="" method="POST" novalidate>
+    <form action="" method="POST" novalidate autocomplete="off">
       <h1>Login</h1>
       
       <img src="../assets/logo.png" alt="Logo" style="width: 100px; display: block; margin: 0 auto 20px;">
 
       <div class="input-box">
-        <input type="text" name="username" placeholder="Email" 
+        <input type="text" name="username" id="usernameInput" placeholder="Email" list="saved-users"
                value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
         <i class='bx bxs-user'></i>
+        
+        <datalist id="saved-users">
+            <?php foreach ($saved_accounts as $email => $pass): ?>
+                <option value="<?php echo htmlspecialchars($email); ?>">
+            <?php endforeach; ?>
+        </datalist>
       </div>
 
       <div class="input-box">
-        <input type="password" name="password" id="myPassword" placeholder="Password">
+        <input type="password" name="password" id="passwordInput" placeholder="Password">
         <i class='bx bxs-hide' id="togglePassword"></i>
       </div>
 
       <div class="remember-forgot">
-        <label><input type="checkbox">Remember Me</label>
-        <a href="#">Forgot Password</a>
+        <label><input type="checkbox" name="remember_me" id="rememberCheck">Remember Me</label>
+        <a href="forgot_password.php">Forgot Password</a>
       </div>
 
       <button type="submit" class="btn">Login</button>
@@ -108,6 +151,29 @@ $conn->close();
       </div>
     </form>
   </div>
+
+  <script>
+      // Lấy dữ liệu từ PHP
+      const savedAccounts = <?php echo $json_accounts_for_js; ?>;
+      
+      const userInput = document.getElementById('usernameInput');
+      const passInput = document.getElementById('passwordInput');
+      const rememberCheck = document.getElementById('rememberCheck');
+
+      // Khi gõ hoặc chọn email -> tự điền pass
+      userInput.addEventListener('input', function() {
+          const email = this.value;
+          if (savedAccounts.hasOwnProperty(email)) {
+              passInput.value = savedAccounts[email];
+              rememberCheck.checked = true;
+          } else {
+              // Nếu sửa email khác thì xóa pass cũ đi
+              passInput.value = ''; 
+              rememberCheck.checked = false;
+          }
+      });
+  </script>
+
   <script src="reset.js"></script>
 </body>
 </html>
