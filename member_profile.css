@@ -1,0 +1,399 @@
+/* ================== 1. RESET & VARIABLES (PREMIUM RED & BLACK) ================== */
+:root {
+    /* MÀU CHỦ ĐẠO: ĐỎ ĐẦM (KHÔNG GẮT) */
+    --primary: #d92027;         /* Đỏ cherry đậm, nhìn sang */
+    --primary-dark: #b01217;    /* Đỏ trầm khi hover */
+    --primary-light: rgba(217, 32, 39, 0.1); /* Nền đỏ nhạt cho active state */
+
+    /* MÀU NỀN & TEXT (DARK THEME) */
+    --bg-body: #121212;         /* Đen than (không phải đen kịt) để dịu mắt */
+    --bg-card: #1e1e1e;         /* Xám đen cho các khung */
+    --bg-input: #2c2c2c;        /* Nền ô nhập liệu sáng hơn chút */
+    --border-color: #333333;    /* Viền xám tối */
+    
+    --text-main: #ffffff;       /* Trắng tinh */
+    --text-muted: #a0a0a0;      /* Xám bạc */
+    
+    --success: #2e7d32;         /* Xanh lá đậm */
+    
+    --radius: 6px;              /* Bo góc nhẹ, vuông vức nam tính */
+    --font-main: 'Inter', sans-serif;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Bóng đổ nhẹ, tự nhiên */
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+/* ================== 2. LAYOUT ================== */
+.main-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background: var(--bg-card);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--border-color);
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main); /* Logo màu trắng */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.logo i { color: var(--primary); font-size: 1.8rem; } /* Chỉ icon màu đỏ */
+
+.user-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-bottom: 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 8px rgba(217, 32, 39, 0.3);
+}
+
+.user-preview h4 { font-size: 0.95rem; margin-bottom: 0; color: var(--text-main); }
+.user-preview p { font-size: 0.8rem; color: var(--text-muted); }
+
+.nav-links { list-style: none; }
+.nav-links li {
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-muted);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Hover & Active: Nền đỏ nhạt, chữ đỏ, border trái đỏ */
+.nav-links li:hover {
+    background-color: #252525;
+    color: var(--text-main);
+}
+.nav-links li.active {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Main Content Area */
+.content-area {
+    flex: 1;
+    padding: 2.5rem;
+    overflow-y: auto;
+}
+
+header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+header h1 { font-size: 1.8rem; font-weight: 700; color: var(--text-main); }
+header p { color: var(--text-muted); margin-top: 5px; }
+
+/* ================== 3. TABS UI ================== */
+.tabs-container {
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    /* box-shadow: var(--shadow); bỏ shadow để phẳng hơn */
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.tabs-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255,255,255,0.02);
+    padding: 0 1rem;
+}
+
+.tab-btn {
+    padding: 1rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-weight: 600;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.tab-btn:hover { color: var(--text-main); }
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: linear-gradient(to top, var(--primary-light), transparent);
+}
+
+.tab-content { padding: 2.5rem; }
+.section { display: none; animation: slideUp 0.3s ease-out; }
+.section.active { display: block; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.section-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-main);
+    font-weight: 700;
+    border-left: 4px solid var(--primary);
+    padding-left: 10px;
+}
+
+/* ================== 4. FORMS (MATTE DARK) ================== */
+.modern-form { max-width: 600px; }
+.form-group { margin-bottom: 1.5rem; }
+.form-group label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 1rem;
+    color: #666;
+    z-index: 1;
+}
+
+.input-wrapper input, .input-wrapper select {
+    width: 100%;
+    padding: 0.8rem 1rem 0.8rem 2.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+    background: var(--bg-input);
+    color: var(--text-main);
+}
+
+.input-wrapper input:focus, .input-wrapper select:focus {
+    border-color: var(--primary);
+    background: #333;
+}
+
+.btn-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.9rem 2.5rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.btn-submit:hover { background: var(--primary-dark); }
+.full-width { width: 100%; }
+
+/* ================== 5. PRICING CARDS ================== */
+.membership__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.membership__card {
+    background: #1a1a1a;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.membership__card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+/* Gói Popular: Nền hơi sáng hơn xíu, viền đỏ */
+.membership__card.popular {
+    border: 2px solid var(--primary);
+    background: #222;
+}
+
+.membership__card .tag {
+    position: absolute;
+    top: 15px; right: 15px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.card-header h4 { 
+    font-size: 0.9rem; 
+    color: var(--primary); 
+    font-weight: 700;
+    letter-spacing: 1px; 
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.card-header h3 {
+    font-size: 2rem;
+    margin: 0 0 1.5rem;
+    color: var(--text-main);
+    font-weight: 700;
+}
+.card-header h3 span { font-size: 0.9rem; color: var(--text-muted); font-weight: 400; }
+
+.membership__card ul { 
+    list-style: none; 
+    margin-bottom: 2rem; 
+    text-align: left; 
+    flex-grow: 1; /* Đẩy nút xuống đáy */
+}
+.membership__card ul li {
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #cccccc;
+}
+.membership__card ul li i { color: var(--primary); font-size: 1.1rem;}
+
+.btn-card {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    width: 100%;
+}
+.btn-card:hover {
+    background: #333;
+    border-color: white;
+}
+.btn-card.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+.btn-card.primary:hover {
+    background: var(--primary-dark);
+}
+
+.divider { margin: 3rem 0; border: 0; border-top: 1px solid var(--border-color); }
+
+/* ================== 6. TABLES ================== */
+.table-container { 
+    overflow-x: auto; 
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius); 
+    background: var(--bg-card);
+}
+table { width: 100%; border-collapse: collapse; min-width: 600px; }
+th, td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+
+th { 
+    background: #252525; 
+    font-weight: 600; 
+    font-size: 0.8rem; 
+    color: var(--text-muted); 
+    text-transform: uppercase; 
+}
+td { font-size: 0.95rem; color: var(--text-main); }
+tr:last-child td { border-bottom: none; }
+
+.status-success {
+    color: #4caf50;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.status-success::before {
+    content: '';
+    display: block;
+    width: 6px; 
+    height: 6px;
+    background: #4caf50;
+    border-radius: 50%;
+}
+
+.badge {
+    background: #333;
+    color: #eee;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    border: 1px solid #444;
+}
+
+.amount { font-family: monospace; font-size: 1rem; color: var(--text-main); }
+
+.alert { padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 10px; }
+.alert.success { background: rgba(46, 125, 50, 0.2); color: #81c784; border: 1px solid #2e7d32; }
+.alert.error { background: rgba(211, 47, 47, 0.2); color: #e57373; border: 1px solid #c62828; }
+.empty-state { text-align: center; color: var(--text-muted); padding: 2rem; }
+
+/* Responsive Mobile */
+@media (max-width: 768px) {
+    .main-wrapper { flex-direction: column; }
+    .sidebar { width: 100%; padding: 1.5rem; border-right: none; border-bottom: 1px solid var(--border-color); }
+    .content-area { padding: 1.5rem; }
+    .tabs-nav { flex-wrap: wrap; }
+    .tab-btn { flex: 1; justify-content: center; font-size: 0.85rem; padding: 0.8rem; }
+}
