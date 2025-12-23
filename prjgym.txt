@@ -1,12 +1,14 @@
 Tính năng quản trị viên🏢
 
-Trang tổng quan : Xem tổng số thành viên, thành viên đang hoạt động, thành viên đã hết hạn và các giao dịch gần đây.
+Trang tổng quan : Xem tổng số thành vên, thành viên đang hoạt động, thành viên đã hết hạn và các giao dịch gần đây.
 
 Quản lý thành viên : Thêm, chỉnh sửa và xóa thông tin thành viên, bao gồm loại thành viên và ngày hết hạn.
 
 Thông báo : Tạo, chỉnh sửa và xóa các thông báo về sự kiện, cập nhật và thông tin của phòng tập.
 
 Lịch sử giao dịch : Xem tất cả các giao dịch với các chi tiết như phương thức thanh toán, thay đổi thành viên và tổng số tiền.
+
+Thống kê : Thống kê doanh thu
 
 Tính năng dành cho thành viên 🏃‍♂️
 

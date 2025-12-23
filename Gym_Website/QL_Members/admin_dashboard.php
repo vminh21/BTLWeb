@@ -2,7 +2,7 @@
 session_start();
 
 // 1. BẢO MẬT: Kiểm tra xem đã đăng nhập chưa và có phải Admin không?
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
     // Nếu không phải admin, đá về trang login
     header("Location: login.php");
     exit();

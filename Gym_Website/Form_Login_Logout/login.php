@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($result_admin->num_rows > 0) {
             $row = $result_admin->fetch_assoc();
-            $_SESSION['user_id'] = $row['admin_id'];
+            $_SESSION['admin_id'] = $row['admin_id'];
             $_SESSION['full_name'] = $row['full_name'];
             $_SESSION['role'] = 'admin';
             header("Location: ../QL_Members/admin_dashboard.php");
@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if ($result_member->num_rows > 0) {
                 $row = $result_member->fetch_assoc();
-                $_SESSION['user_id'] = $row['member_id'];
+                $_SESSION['member_id'] = $row['member_id'];
                 $_SESSION['full_name'] = $row['full_name'];
                 $_SESSION['role'] = 'member';
                 header("Location: ../index.php");
@@ -86,7 +86,7 @@ $conn->close();
       <img src="../assets/logo.png" alt="Logo" style="width: 100px; display: block; margin: 0 auto 20px;">
 
       <div class="input-box">
-        <input type="text" name="username" placeholder="Email (Member) or Username (Admin)" 
+        <input type="text" name="username" placeholder="Email" 
                value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
         <i class='bx bxs-user'></i>
       </div>
