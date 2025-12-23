@@ -6,12 +6,12 @@ session_start();
 require_once 'connectdb.php';
 
 /* ================== KIỂM TRA ĐĂNG NHẬP ================== */
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
+if (!isset($_SESSION['member_id']) || $_SESSION['role'] !== 'member') {
     header("Location: ../Login/login.php");
     exit();
 }
 
-$member_id = $_SESSION['user_id'];
+$member_id = $_SESSION['member_id'];
 $success = "";
 $error = "";
 

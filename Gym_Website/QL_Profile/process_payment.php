@@ -3,11 +3,11 @@ session_start();
 require_once 'connectdb.php';
 
 // 1. Kiểm tra đăng nhập
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['member_id'])) {
     die("Vui lòng đăng nhập!");
 }
 
-$member_id = $_SESSION['user_id'];
+$member_id = $_SESSION['member_id'];
 
 // 2. Xử lý khi bấm nút Thanh toán
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
