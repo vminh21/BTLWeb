@@ -12,13 +12,13 @@ $conn = new mysqli("localhost", "root", "", "GymManagement");
 if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
 $conn->set_charset("utf8");
 
-// 3. LẤY DỮ LIỆU THỐNG KÊ
+// 3. LẤY DỮ LIỆU THỐNG KÊ TỔNG QUAN
 $total_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM transactions")->fetch_row()[0] ?? 0;
 $active_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date >= CURDATE() AND member_id IN (SELECT member_id FROM transactions)")->fetch_row()[0] ?? 0;
 $expired_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date < CURDATE() AND member_id IN (SELECT member_id FROM transactions)")->fetch_row()[0] ?? 0;
 $total_revenue = $conn->query("SELECT SUM(amount) FROM transactions")->fetch_row()[0] ?? 0;
 
-// Lấy danh sách giao dịch (có lấy thêm end_date từ bảng subscriptions để đổ vào form sửa)
+// Lấy danh sách giao dịch gần đây
 $sql_recent = "SELECT t.*, m.full_name, 
               (SELECT MAX(ms.end_date) FROM member_subscriptions ms WHERE ms.member_id = t.member_id) AS end_date 
               FROM transactions t 
@@ -35,6 +35,12 @@ $recent_transactions = $conn->query($sql_recent);
     <title>Admin Dashboard - FitPhysique</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="admin_dashboard.css">
+    <style>
+        /* Bổ sung một chút style để đồng bộ với trang thongke.php */
+        .sidebar ul li a.active { background: #ff3e3e; color: #fff; border-radius: 8px; }
+        .type-reg { background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .type-renew { background: #f1f8e9; color: #388e3c; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+    </style>
 </head>
 <body>
 
@@ -44,7 +50,7 @@ $recent_transactions = $conn->query($sql_recent);
             <li><a href="admin_dashboard.php" class="active"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
             <li><a href="members.php"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
             <li><a href="packages.php"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
-            <li><a href="reports.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+            <li><a href="../QL_Profile/thongke.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
             <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
     </div>
@@ -115,89 +121,8 @@ $recent_transactions = $conn->query($sql_recent);
     </div>
 
     <div id="addTransactionModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header"><h2>Thêm Giao Dịch Mới</h2><span class="close-modal">&times;</span></div>
-            <form action="transaction_handler.php" method="POST">
-                <div class="form-group">
-                    <label>Thành viên:</label>
-                    <select name="member_id" id="memberSelect" required>
-                        <option value="">-- Chọn thành viên --</option>
-                        <option value="new_member" style="color:red; font-weight:bold;">+ THÊM NGƯỜI MỚI</option>
-                        <?php
-                        $list = $conn->query("SELECT member_id, full_name FROM members ORDER BY full_name ASC");
-                        while($m = $list->fetch_assoc()) echo "<option value='".$m['member_id']."'>".htmlspecialchars($m['full_name'])."</option>";
-                        ?>
-                    </select>
-                </div>
-                <div id="newNameGroup" class="form-group" style="display:none;">
-                    <label>Tên thành viên mới:</label>
-                    <input type="text" name="new_member_name" id="newMemberName">
-                </div>
-                <div class="form-group">
-                    <label>Ngày hết hạn tập:</label>
-                    <input type="date" name="end_date" required min="<?= date('Y-m-d') ?>">
-                </div>
-                <div class="form-group">
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" name="amount" required>
-                </div>
-                <div class="form-group">
-                    <label>Loại & Phương thức:</label>
-                    <div style="display: flex; gap: 10px;">
-                        <select name="transaction_type"><option value="Registration">Đăng ký</option><option value="Renewal">Gia hạn</option></select>
-                        <select name="payment_method"><option value="Tiền mặt">Tiền mặt</option><option value="Chuyển khoản">Chuyển khoản</option></select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="close-modal">Hủy</button>
-                    <button type="submit" name="btn_save" class="btn-save">Lưu Giao Dịch</button>
-                </div>
-            </form>
         </div>
-    </div>
-
-    <div id="editTransactionModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header"><h2>Sửa Giao Dịch #<span id="display_edit_id"></span></h2><span class="close-modal">&times;</span></div>
-            <form action="transaction_handler.php" method="POST">
-                <input type="hidden" name="transaction_id" id="edit_trans_id">
-                <input type="hidden" name="member_id" id="edit_member_id"> <div class="form-group">
-                    <label>Ngày hết hạn hiện tại:</label>
-                    <input type="date" name="end_date" id="edit_end_date" required>
-                </div>
-                <div class="form-group">
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" name="amount" id="edit_amount" required>
-                </div>
-                <div class="form-group">
-                    <label>Loại giao dịch:</label>
-                    <select name="transaction_type" id="edit_type">
-                        <option value="Registration">Đăng ký mới</option>
-                        <option value="Renewal">Gia hạn</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Phương thức thanh toán:</label>
-                    <select name="payment_method" id="edit_method">
-                        <option value="Tiền mặt">Tiền mặt</option>
-                        <option value="Chuyển khoản">Chuyển khoản</option>
-                        <option value="Momo">Momo</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="close-modal">Hủy</button>
-                    <button type="submit" name="btn_update" class="btn-save" style="background: #3498db;">Cập nhật thay đổi</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script src="admin_dashboard.js"></script>
-    <?php if(isset($_GET['msg'])): ?>
-        <script>
-            const msgs = {success: 'Thêm thành công!', updated: 'Cập nhật thành công!', deleted: 'Đã xóa!', error: 'Có lỗi xảy ra!'};
-            alert(msgs['<?= $_GET['msg'] ?>'] || 'Thông báo');
-        </script>
-    <?php endif; ?>
 </body>
 </html>

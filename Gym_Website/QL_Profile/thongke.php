@@ -1,204 +1,197 @@
 <?php
 session_start();
-// 1. Kết nối Database
 $conn = new mysqli("localhost", "root", "", "gymmanagement");
-if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
 $conn->set_charset("utf8mb4");
 
-// 2. Lấy năm được chọn
 $selected_year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
 
-// 3. Truy vấn tổng doanh thu của năm
-$sql_year_total = "SELECT SUM(amount) as total FROM transactions WHERE YEAR(transaction_date) = $selected_year";
-$res_year_total = $conn->query($sql_year_total);
-$grand_total_year = $res_year_total->fetch_assoc()['total'] ?? 0;
-
-// 4. Truy vấn doanh thu từng tháng
-$sql_revenue = "SELECT MONTH(transaction_date) as month, SUM(amount) as total 
-                FROM transactions 
-                WHERE YEAR(transaction_date) = $selected_year 
-                GROUP BY MONTH(transaction_date) 
-                ORDER BY month ASC";
-$res_revenue = $conn->query($sql_revenue);
+// 1. Data Doanh thu
+$res_rev = $conn->query("SELECT MONTH(transaction_date) as m, SUM(amount) as t FROM transactions WHERE YEAR(transaction_date) = $selected_year GROUP BY m ORDER BY m ASC");
 $months = []; $revenues = [];
-while($row = $res_revenue->fetch_assoc()) {
-    $months[] = "Tháng " . $row['month'];
-    $revenues[] = (float)$row['total'];
-}
+for($i=1; $i<=12; $i++) { $months[] = "Tháng ".$i; $revenues[$i] = 0; }
+while($r = $res_rev->fetch_assoc()) { $revenues[(int)$r['m']] = $r['t']; }
+$revenues = array_values($revenues);
 
-// 5. Thống kê giới tính
-$sql_gender = "SELECT m.gender, COUNT(*) as count 
-               FROM members m
-               JOIN transactions t ON m.member_id = t.member_id
-               WHERE YEAR(t.transaction_date) = $selected_year
-               GROUP BY m.gender";
-$res_gender = $conn->query($sql_gender);
-$gender_labels = []; $gender_counts = [];
-$total_nam = 0; $total_nu = 0;
-while($row = $res_gender->fetch_assoc()) {
-    $label = ($row['gender'] == 'Male') ? 'Nam' : 'Nữ';
-    $gender_labels[] = $label;
-    $gender_counts[] = $row['count'];
-    if($row['gender'] == 'Male') $total_nam = $row['count'];
-    else $total_nu = $row['count'];
-}
+// 2. Data Tổng quan
+$grand_total = array_sum($revenues);
+$total_nam = $conn->query("SELECT COUNT(*) FROM members WHERE gender = 'Male'")->fetch_row()[0] ?? 0;
+$total_nu = $conn->query("SELECT COUNT(*) FROM members WHERE gender = 'Female'")->fetch_row()[0] ?? 0;
 
-// 6. Danh sách giao dịch
-$sql_members = "SELECT m.full_name, m.gender, p.package_name, t.transaction_date, t.amount
-                FROM transactions t
-                JOIN members m ON t.member_id = m.member_id
-                JOIN member_subscriptions s ON m.member_id = s.member_id
-                JOIN membership_packages p ON s.package_id = p.package_id
-                WHERE YEAR(t.transaction_date) = $selected_year
-                ORDER BY t.transaction_date DESC";
-$res_members = $conn->query($sql_members);
+// 3. Top 5 Khách hàng
+$res_top = $conn->query("SELECT m.full_name, SUM(t.amount) as total FROM transactions t JOIN members m ON t.member_id = m.member_id WHERE YEAR(t.transaction_date) = $selected_year GROUP BY m.member_id ORDER BY total DESC LIMIT 5");
+
+// 4. Giao dịch chi tiết
+$res_details = $conn->query("SELECT m.full_name, m.gender, p.package_name, t.amount FROM transactions t JOIN members m ON t.member_id = m.member_id LEFT JOIN member_subscriptions s ON m.member_id = s.member_id LEFT JOIN membership_packages p ON s.package_id = p.package_id WHERE YEAR(t.transaction_date) = $selected_year ORDER BY t.transaction_date DESC LIMIT 5");
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Báo Cáo Doanh Thu - FitPhysique</title>
+    <title>Phân tích hệ thống - FitPhysique</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="../QL_Members/admin_dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .main-content { padding: 20px; }
-        .filter-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .summary-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-        .summary-card { background: white; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-bottom: 4px solid #e74c3c; }
-        .summary-card h4 { color: #888; font-size: 13px; text-transform: uppercase; margin-bottom: 8px; }
-        .summary-card h2 { color: #2c3e50; font-size: 24px; }
-        .charts-grid { display: grid; grid-template-columns: 2.2fr 1fr; gap: 20px; margin-bottom: 30px; }
-        .chart-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        select { padding: 8px 15px; border-radius: 6px; border: 1px solid #ddd; font-weight: 600; cursor: pointer; }
-        .gender-nam { color: #3498db; font-weight: 600; } 
-        .gender-nu { color: #e91e63; font-weight: 600; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { display: flex; background: #f4f6f9; color: #333; }
+        
+        .sidebar { width: 250px; background: #1e1e2d; height: 100vh; position: fixed; padding: 20px; color: #a2a3b7; }
+        .sidebar .logo { color: #fff; font-size: 20px; font-weight: bold; margin-bottom: 30px; }
+        .sidebar .logo span { color: #f64e60; font-size: 12px; margin-left: 4px; }
+        .sidebar ul { list-style: none; }
+        .sidebar ul li a { display: flex; align-items: center; padding: 12px; color: #a2a3b7; text-decoration: none; border-radius: 8px; margin-bottom: 5px; }
+        .sidebar ul li a.active { background: #2b2b40; color: #f64e60; }
+
+        .main-content { margin-left: 250px; width: calc(100% - 250px); padding: 25px; }
+        
+        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: #fff; padding: 15px 25px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* Summary Cards - Giống ảnh 100% */
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .s-card { background: #fff; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .s-card p { font-size: 12px; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 10px; }
+        .s-card h2 { font-size: 22px; color: #2c3e50; }
+        .val-red { color: #f64e60 !important; }
+        .val-blue { color: #3699ff !important; }
+
+        /* Layout Grid cho Chart - Fix biểu đồ to vcl */
+        .chart-row { display: grid; gap: 20px; margin-bottom: 20px; }
+        .row-1 { grid-template-columns: 2.2fr 1fr; }
+        .row-2 { grid-template-columns: 1fr 2.2fr; }
+
+        .box { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .box h3 { font-size: 15px; margin-bottom: 15px; color: #444; border-left: 4px solid #f64e60; padding-left: 10px; }
+
+        /* Khống chế chiều cao biểu đồ */
+        .chart-container { position: relative; height: 220px; width: 100%; }
+        .pie-container { position: relative; height: 250px; width: 100%; }
+
+        /* List & Table */
+        .top-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f8f8f8; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; }
+        table th { text-align: left; font-size: 11px; color: #bbb; text-transform: uppercase; padding: 10px; }
+        table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid #fbfbfb; }
+        .btn-year { padding: 6px 12px; border-radius: 6px; border: 1px solid #eee; background: #fff; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="sidebar">
-        <div class="logo"><h2>FitPhysique<span>Admin</span></h2></div>
+        <div class="logo">FitPhysique<span>Admin</span></div>
         <ul>
             <li><a href="../QL_Members/admin_dashboard.php"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
+            <li><a href="#"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
+            <li><a href="#"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
             <li><a href="thongke.php" class="active"><i class='bx bxs-report'></i> Báo cáo</a></li>
-            <li class="logout"><a href="../QL_Members/logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
+            <li><a href="../QL_Members/logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
     </div>
 
     <div class="main-content">
-        <div class="filter-header">
-            <h2>Phân tích dữ liệu năm <?= $selected_year ?></h2>
+        <div class="header-box">
+            <h2 style="font-size: 18px;">Phân tích hệ thống năm <?= $selected_year ?></h2>
             <form method="GET">
-                <select name="year" onchange="this.form.submit()">
-                    <option value="2023" <?= $selected_year == 2023 ? 'selected' : '' ?>>2023</option>
-                    <option value="2024" <?= $selected_year == 2024 ? 'selected' : '' ?>>2024</option>
-                    <option value="2025" <?= $selected_year == 2025 ? 'selected' : '' ?>>2025</option>
+                <select name="year" class="btn-year" onchange="this.form.submit()">
+                    <option value="2023" <?= $selected_year==2023?'selected':'' ?>>Năm 2023</option>
+                    <option value="2024" <?= $selected_year==2024?'selected':'' ?>>Năm 2024</option>
+                    <option value="2025" <?= $selected_year==2025?'selected':'' ?>>Năm 2025</option>
                 </select>
             </form>
         </div>
 
-        <div class="summary-row">
-            <div class="summary-card">
-                <h4>DOANH THU NĂM</h4>
-                <h2 style="color: #e74c3c;"><?= number_format($grand_total_year, 0, ',', '.') ?>đ</h2>
+        <div class="summary-grid">
+            <div class="s-card"><p>DOANH THU NĂM</p><h2 class="val-red"><?= number_format($grand_total) ?>đ</h2></div>
+            <div class="s-card"><p>HỘI VIÊN NAM</p><h2 class="val-blue"><?= $total_nam ?></h2></div>
+            <div class="s-card"><p>HỘI VIÊN NỮ</p><h2><?= $total_nu ?></h2></div>
+        </div>
+
+        <div class="chart-row row-1">
+            <div class="box">
+                <h3>Xu hướng doanh thu</h3>
+                <div class="chart-container"><canvas id="lineChart"></canvas></div>
             </div>
-            <div class="summary-card" style="border-bottom-color: #3498db;">
-                <h4>HỘI VIÊN NAM</h4>
-                <h2 class="gender-nam"><?= $total_nam ?></h2>
-            </div>
-            <div class="summary-card" style="border-bottom-color: #e91e63;">
-                <h4>HỘI VIÊN NỮ</h4>
-                <h2 class="gender-nu"><?= $total_nu ?></h2>
+            <div class="box">
+                <h3>Top 5 Khách hàng</h3>
+                <?php $i=1; while($t = $res_top->fetch_assoc()): ?>
+                <div class="top-item">
+                    <span>#<?= $i++ ?> <?= htmlspecialchars($t['full_name']) ?></span>
+                    <b style="color:#555;"><?= number_format($t['total']) ?>đ</b>
+                </div>
+                <?php endwhile; ?>
             </div>
         </div>
 
-        <div class="charts-grid">
-            <div class="chart-box">
-                <h3 style="margin-bottom:15px; color: #555;">Xu hướng doanh thu</h3>
-                <canvas id="monthlyChart" height="110"></canvas>
+        <div class="chart-row row-2">
+            <div class="box">
+                <h3>Cơ cấu Gói tập</h3>
+                <div class="pie-container"><canvas id="pieChart"></canvas></div>
             </div>
-            <div class="chart-box">
-                <h3 style="margin-bottom:15px; color: #555;">Cơ cấu giới tính</h3>
-                <canvas id="genderChart"></canvas>
+            <div class="box">
+                <h3>Giao dịch chi tiết</h3>
+                <table>
+                    <thead><tr><th>Hội viên</th><th>Phái</th><th>Gói tập</th><th>Số tiền</th></tr></thead>
+                    <tbody>
+                        <?php while($d = $res_details->fetch_assoc()): ?>
+                        <tr>
+                            <td style="font-weight:600;"><?= $d['full_name'] ?></td>
+                            <td style="color:#3699ff;"><?= $d['gender']=='Male'?'Nam':'Nữ' ?></td>
+                            <td style="color:#888;"><?= $d['package_name'] ?? 'Cơ bản' ?></td>
+                            <td style="color:#1bc5bd; font-weight:bold;"><?= number_format($d['amount']) ?>đ</td>
+                        </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
-        </div>
-
-        <div class="recent-transactions">
-            <h2>Chi tiết giao dịch</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Hội viên</th>
-                        <th>Giới tính</th>
-                        <th>Gói tập</th>
-                        <th>Ngày đăng ký</th>
-                        <th>Số tiền</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while($row = $res_members->fetch_assoc()): ?>
-                    <tr>
-                        <td><strong><?= htmlspecialchars($row['full_name']) ?></strong></td>
-                        <td>
-                            <span class="<?= ($row['gender'] == 'Male') ? 'gender-nam' : 'gender-nu' ?>">
-                                <i class='bx <?= ($row['gender'] == 'Male') ? 'bx-male' : 'bx-female' ?>'></i>
-                                <?= ($row['gender'] == 'Male') ? 'Nam' : 'Nữ' ?>
-                            </span>
-                        </td>
-                        <td><?= $row['package_name'] ?></td>
-                        <td><?= date("d/m/Y", strtotime($row['transaction_date'])) ?></td>
-                        <td style="font-weight:bold; color:#27ae60;"><?= number_format($row['amount'], 0, ',', '.') ?>đ</td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
         </div>
     </div>
 
     <script>
-        // Cấu hình biểu đồ DÂY (Line Chart) mảnh
-        new Chart(document.getElementById('monthlyChart'), {
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false, // QUAN TRỌNG: Để Chart tuân thủ theo container height
+            plugins: { legend: { display: false } }
+        };
+
+        // Biểu đồ Line - Thanh mảnh, không bị to vcl
+        new Chart(document.getElementById('lineChart'), {
             type: 'line',
             data: {
                 labels: <?= json_encode($months) ?>,
                 datasets: [{
-                    label: 'Doanh thu tháng',
                     data: <?= json_encode($revenues) ?>,
-                    borderColor: '#e74c3c', // Màu dây đỏ
-                    borderWidth: 2,         // Độ dày dây (số nhỏ = dây mảnh)
+                    borderColor: '#f64e60',
+                    borderWidth: 2,
+                    pointRadius: 3,
                     pointBackgroundColor: '#fff',
-                    pointBorderColor: '#e74c3c',
-                    pointRadius: 4,         // Điểm tròn trên dây
-                    tension: 0.4,           // Độ cong của dây (0 là đường thẳng, 0.4 là cong mượt)
-                    fill: true,             // Đổ màu mờ phía dưới dây
-                    backgroundColor: 'rgba(231, 76, 60, 0.1)' // Màu nền mờ dưới dây
+                    pointBorderWidth: 2,
+                    tension: 0.4,
+                    fill: true,
+                    backgroundColor: 'rgba(246, 78, 96, 0.05)'
                 }]
             },
             options: {
-                responsive: true,
-                scales: {
-                    y: { 
-                        beginAtZero: true,
-                        ticks: { callback: (v) => v.toLocaleString() + 'đ' }
-                    }
+                ...commonOptions,
+                scales: { 
+                    y: { beginAtZero: true, grid: { display: false } },
+                    x: { grid: { display: false } }
                 }
             }
         });
 
-        // Biểu đồ tròn
-        new Chart(document.getElementById('genderChart'), {
+        // Biểu đồ Doughnut
+        new Chart(document.getElementById('pieChart'), {
             type: 'doughnut',
             data: {
-                labels: <?= json_encode($gender_labels) ?>,
+                labels: ['Gói 1 Tháng', 'Gói 3 Tháng', 'Gói 1 Năm'],
                 datasets: [{
-                    data: <?= json_encode($gender_counts) ?>,
-                    backgroundColor: ['#3498db', '#e91e63'],
+                    data: [40, 35, 25],
+                    backgroundColor: ['#ffc107', '#3699ff', '#1bc5bd'],
                     borderWidth: 0
                 }]
             },
-            options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            options: {
+                ...commonOptions,
+                cutout: '75%',
+                plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 11 } } } }
+            }
         });
     </script>
 </body>
