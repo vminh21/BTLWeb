@@ -58,8 +58,8 @@ $recent_transactions = $conn->query($sql_recent);
         <ul>
             <li><a href="admin_dashboard.php" class="active"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
             <li><a href="members.php"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
-            <li><a href="process_payment.php"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
-            <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Thống kê</a></li>
+            <li><a href="thongke.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+            <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Lịch sử giao dịch</a></li>
             <li><a href="admin_thongbao.php"><i class='bx bxs-bell'></i> Thông báo</a></li>
             <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
@@ -185,9 +185,14 @@ $recent_transactions = $conn->query($sql_recent);
                     <input type="date" name="end_date" required min="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="form-group">
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" name="amount" required>
-                </div>
+    <label>Gói tập & Số tiền (VNĐ):</label>
+    <select name="amount" id="amountSelect" required>   
+        <option value="">-- Chọn gói tập --</option>
+        <option value="500000" >Gói 1 tháng - 500.000đ</option>
+        <option value="1350000" >Gói 3 tháng - 1.350.000đ</option>
+        <option value="5000000" >Gói 1 năm - 5.000.000đ</option>
+    </select>
+</div>
                 <div class="form-group">
                     <label>Loại & Phương thức:</label>
                     <div style="display: flex; gap: 10px;">
