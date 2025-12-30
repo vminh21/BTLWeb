@@ -1,8 +1,20 @@
 <?php
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 1;
+// 1. KẾT NỐI DATABASE
+include("../QL_Profile/connectdb.php");
 
-$blogs = [
-    1 => [
+// 2. LẤY ID TỪ URL (Ví dụ: ?id=11)
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+// 3. TRUY VẤN DỮ LIỆU TỪ BẢNG NOTIFICATIONS (Thông báo)
+$sql = "SELECT * FROM notifications WHERE notification_id = $id";
+$result = mysqli_query($conn, $sql);
+$blog = mysqli_fetch_assoc($result);
+
+// 4. NẾU KHÔNG CÓ TRONG DATABASE THÌ DÙNG DỮ LIỆU MẪU (BLOG CỐ ĐỊNH)
+if (!$blog) {
+    // Đây là mảng dự phòng nếu ID không tồn tại trong database (ID 1, 2, 3, 4 bạn đã viết)
+    $static_blogs = [
+ 1 => [
         "title" => "Dinh dưỡng tối ưu cho hiệu suất tập luyện",
         "content" => "
     1. Tầm quan trọng của việc ăn uống sau khi tập luyện
@@ -280,8 +292,14 @@ Trong 30 phút: Bổ sung carbohydrate và protein (sữa chua, sữa, trái câ
 2 giờ sau: Bữa chính đầy đủ các nhóm chất dinh dưỡng."
     ],
 ];
-
-$blog = $blogs[$id] ?? $blogs[1];
+    
+    if (isset($static_blogs[$id])) {
+        $blog = $static_blogs[$id];
+    } else {
+        // Nếu vẫn không có thì lấy bài 1 làm mặc định
+        $blog = $static_blogs[1];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -290,41 +308,54 @@ $blog = $blogs[$id] ?? $blogs[1];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($blog['title']); ?></title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <style>
-        body { padding: 40px; font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; background-color: #f4f4f4; }
-        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h1 { color: #333; border-bottom: 2px solid red; padding-bottom: 10px; margin-top: 10px; }
-        p { color: #555; font-size: 1.1em; white-space: pre-line; }
+        body { padding: 40px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.8; background-color: #f8f9fa; margin: 0; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         
-        /* Cải thiện giao diện nút quay lại */
-        .back-btn { 
-            display: inline-block;
-            margin-bottom: 20px;
-            text-decoration: none; 
-            color: #e74c3c; 
-            font-weight: bold;
-            transition: 0.2s;
-        }
-        .back-btn:hover { color: #c0392b; transform: translateX(-5px); }
+        /* Nút quay lại */
+        .back-btn { display: inline-flex; align-items: center; text-decoration: none; color: #ff6b6b; font-weight: bold; margin-bottom: 25px; transition: 0.3s; }
+        .back-btn:hover { color: #ee5253; transform: translateX(-5px); }
+        .back-btn i { margin-right: 5px; font-size: 1.2rem; }
+
+        /* Tiêu đề và ảnh */
+        h1 { color: #2d3436; font-size: 2.2rem; margin-top: 0; line-height: 1.3; border-left: 5px solid #ff6b6b; padding-left: 15px; }
+        .post-img { width: 100%; height: 400px; object-fit: cover; border-radius: 10px; margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        /* Nội dung bài viết */
+        .content { color: #4b4b4b; font-size: 1.1rem; white-space: pre-line; text-align: justify; }
         
-        .nav-test { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-        .nav-test a { margin-right: 15px; color: #3498db; text-decoration: none; font-size: 0.9em; }
+        /* Phân vùng xem nhanh */
+        .nav-test { margin-top: 50px; border-top: 2px solid #f1f1f1; padding-top: 20px; }
+        .nav-test small { color: #95a5a6; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-links { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .nav-links a { background: #f1f2f6; color: #57606f; padding: 8px 15px; border-radius: 5px; text-decoration: none; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { background: #ff6b6b; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <a href="../index.php" class="back-btn">← Quay lại</a>
+    <a href="../index.php" class="back-btn"><i class='bx bx-left-arrow-alt'></i> Quay lại trang chủ</a>
     
     <h1><?php echo htmlspecialchars($blog['title']); ?></h1>
-    <p><?php echo htmlspecialchars($blog['content']); ?></p>
+
+    <?php if(isset($blog['image']) && $blog['image'] != 'NULL' && !empty($blog['image'])): ?>
+        <img src="../assets/<?php echo $blog['image']; ?>" class="post-img" alt="Blog Image">
+    <?php endif; ?>
+
+    <div class="content">
+        <?php echo htmlspecialchars($blog['content']); ?>
+    </div>
 
     <div class="nav-test">
-        <small>Xem nhanh bài khác:</small><br>
-        <a href="?id=1">Bài 1</a>
-        <a href="?id=2">Bài 2</a>
-        <a href="?id=3">Bài 3</a>
-        <a href="?id=4">Bài 4</a>
+        <small>Các bài viết khác:</small>
+        <div class="nav-links">
+            <a href="?id=1">Dinh dưỡng</a>
+            <a href="?id=2">Mục tiêu Fitness</a>
+            <a href="?id=3">Người bận rộn</a>
+            <a href="?id=4">Chạy bộ</a>
+            </div>
     </div>
 </div>
 
