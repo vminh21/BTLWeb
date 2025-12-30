@@ -1,14 +1,37 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php"); exit();
-}
-
+// 1. KẾT NỐI & KIỂM TRA QUYỀN
 $conn = new mysqli("localhost", "root", "", "gymmanagement");
 $conn->set_charset("utf8mb4");
 
-// TRUY VẤN DỮ LIỆU ĐỂ HIỂN THỊ
+if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php"); exit();
+}
+
+// 2. LẤY DỮ LIỆU BỘ LỌC TỪ URL
 $search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
+$filter_package = isset($_GET['filter_package']) ? $_GET['filter_package'] : '';
+$filter_status = isset($_GET['filter_status']) ? $_GET['filter_status'] : '';
+
+// 3. XÂY DỰNG CÂU LỆNH SQL CÓ ĐIỀU KIỆN
+$where_clauses = ["1=1"];
+
+if (!empty($search)) {
+    $where_clauses[] = "m.full_name LIKE '%$search%'";
+}
+if (!empty($filter_package)) {
+    $where_clauses[] = "p.package_id = '$filter_package'";
+}
+if (!empty($filter_status)) {
+    if ($filter_status == 'Expired') {
+        $where_clauses[] = "ms.end_date < CURDATE()"; 
+    } else {
+        $where_clauses[] = "m.status = '$filter_status'"; 
+    }
+}
+
+$where_sql = implode(" AND ", $where_clauses);
+
 $sql = "SELECT m.*, m.status as m_status, ms.start_date, ms.end_date, p.package_name, p.package_id
         FROM members m
         LEFT JOIN (
@@ -16,8 +39,9 @@ $sql = "SELECT m.*, m.status as m_status, ms.start_date, ms.end_date, p.package_
             WHERE subscription_id IN (SELECT MAX(subscription_id) FROM member_subscriptions GROUP BY member_id)
         ) ms ON m.member_id = ms.member_id
         LEFT JOIN membership_packages p ON ms.package_id = p.package_id
-        WHERE m.full_name LIKE '%$search%'
+        WHERE $where_sql
         ORDER BY m.member_id DESC";
+
 $result = $conn->query($sql);
 $today = date('Y-m-d');
 ?>
@@ -39,7 +63,8 @@ $today = date('Y-m-d');
         <li><a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
         <li><a href="members.php" class="active"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
         <li><a href="packages.php"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
-        <li><a href="reports.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+        <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Thống kê</a></li>
+        <li><a href="admin_thongbao.php"><i class='bx bxs-bell'></i> Thông báo</a></li>
         <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
     </ul>
 </div>
@@ -47,23 +72,52 @@ $today = date('Y-m-d');
 <div class="main-content">
     <div class="header">
         <h1>Danh sách hội viên</h1>
-        <div class="user-info" style="display: flex; align-items: center; gap: 10px;">
+        <div class="user-info">
             <span>Xin chào, <strong><?= htmlspecialchars($_SESSION['full_name'] ?? 'Admin') ?></strong></span>
-            <i class='bx bxs-user-circle' style="font-size: 2rem;"></i>
+            <i class='bx bxs-user-circle'></i>
         </div>
     </div>
 
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #fff; padding: 15px; border-radius: 8px;">
-        <form action="members.php" method="GET" style="display: flex; gap: 10px;">
-            <input type="text" name="search" placeholder="Tìm tên hội viên..." value="<?= htmlspecialchars($search) ?>" 
-                   style="padding: 10px 15px; border-radius: 5px; border: 1px solid #ddd; width: 300px;">
-            <button type="submit" class="btn-search" style="background:#34495e; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">
-                <i class='bx bx-search-alt'></i> Tìm kiếm
+    <div class="search-bar-container">
+        <form action="members.php" method="GET">
+            <div class="search-group">
+                <i class='bx bx-search'></i>
+                <input type="text" name="search" placeholder="Tìm tên hội viên..." value="<?= htmlspecialchars($search) ?>">
+            </div>
+
+            <div class="filter-group">
+                <select name="filter_package">
+                    <option value="">-- Tất cả gói --</option>
+                    <?php
+                    $pkgs = $conn->query("SELECT package_id, package_name FROM membership_packages");
+                    while($p = $pkgs->fetch_assoc()):
+                    ?>
+                    <option value="<?= $p['package_id'] ?>" <?= $filter_package == $p['package_id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($p['package_name']) ?>
+                    </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <select name="filter_status">
+                    <option value="">-- Trạng thái --</option>
+                    <option value="Active" <?= $filter_status == 'Active' ? 'selected' : '' ?>>Đang hoạt động</option>
+                    <option value="Inactive" <?= $filter_status == 'Inactive' ? 'selected' : '' ?>>Bị khóa</option>
+                    <option value="Expired" <?= $filter_status == 'Expired' ? 'selected' : '' ?>>Hết hạn</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit-search">Lọc</button>
+
+            <?php if($search || $filter_package || $filter_status): ?>
+                <a href="members.php" class="btn-reset">Xóa lọc</a>
+            <?php endif; ?>
+
+            <button type="button" onclick="openAddModal()" class="btn-add-new">
+                <i class='bx bx-plus-circle'></i> THÊM HỘI VIÊN
             </button>
         </form>
-        <button onclick="openAddModal()" class="btn-add-new" style="background:#2ecc71; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer; font-weight:bold;">
-            <i class='bx bx-plus-circle'></i> THÊM HỘI VIÊN
-        </button>
     </div>
 
     <div class="recent-transactions">
@@ -88,19 +142,24 @@ $today = date('Y-m-d');
                         </span>
                     </td>
                     <td>
-                        <div style="display:flex; gap:12px;">
-                            <a href="javascript:void(0)" onclick='openEditModal(<?= json_encode($row) ?>)'><i class='bx bxs-edit' style="color:#3498db; font-size:1.3rem;"></i></a>
+                        <div class="action-buttons">
+                            <a href="javascript:void(0)" onclick='openEditModal(<?= json_encode($row) ?>)'>
+                                <i class='bx bxs-edit icon-edit'></i>
+                            </a>
                             
-                            <form action="member_action.php" method="POST" style="display:inline;">
+                            <form action="member_action.php" method="POST">
                                 <input type="hidden" name="action" value="toggle_status">
                                 <input type="hidden" name="member_id" value="<?= $row['member_id'] ?>">
                                 <input type="hidden" name="current_status" value="<?= $row['m_status'] ?>">
-                                <button type="submit" style="border:none; background:none; cursor:pointer;">
-                                    <i class='bx <?= $row['m_status']=='Active'?'bxs-lock-open':'bxs-lock' ?>' style="color:<?= $row['m_status']=='Active'?'#2ecc71':'#f1c40f' ?>; font-size:1.3rem;"></i>
+                                <button type="submit">
+                                    <i class='bx <?= $row['m_status']=='Active'?'bxs-lock-open':'bxs-lock' ?> icon-lock' 
+                                       style="color:<?= $row['m_status']=='Active'?'#2ecc71':'#f1c40f' ?>;"></i>
                                 </button>
                             </form>
 
-                            <a href="member_action.php?delete_id=<?= $row['member_id'] ?>" onclick="return confirm('Xác nhận xóa?')"><i class='bx bxs-trash' style="color:#e74c3c; font-size:1.3rem;"></i></a>
+                            <a href="member_action.php?delete_id=<?= $row['member_id'] ?>" onclick="return confirm('Xác nhận xóa?')">
+                                <i class='bx bxs-trash icon-delete'></i>
+                            </a>
                         </div>
                     </td>
                 </tr>
@@ -139,12 +198,15 @@ $today = date('Y-m-d');
 
             <div class="form-group">
                 <label>Trạng thái</label>
-                <select name="status" id="form_status"><option value="Active">Hoạt động</option><option value="Inactive">Khóa</option></select>
+                <select name="status" id="form_status">
+                    <option value="Active">Hoạt động</option>
+                    <option value="Inactive">Khóa</option>
+                </select>
             </div>
 
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
-                <button type="button" onclick="closeModal()">Hủy</button>
-                <button type="submit" style="background:#3498db; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer;">Lưu dữ liệu</button>
+                <button type="button" onclick="closeModal()" style="padding: 10px 20px; border-radius: 5px; cursor: pointer; border: 1px solid #ddd;">Hủy</button>
+                <button type="submit" style="background:#3498db; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">Lưu dữ liệu</button>
             </div>
         </form>
     </div>
