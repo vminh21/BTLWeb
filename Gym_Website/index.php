@@ -5,6 +5,10 @@ session_start();
 //     header("Location: Form_Login_Logout/Login.php");
 //     exit(); 
 // }
+$chat_greeting = "Chào bạn"; // Mặc định
+    if (isset($_SESSION['full_name'])) {
+        $chat_greeting = "Chào " . htmlspecialchars($_SESSION['full_name']);
+    }
 ?>
 
 <!DOCTYPE html>
@@ -107,36 +111,36 @@ session_start();
                 <p>
                  Kiến tạo vóc dáng và xây dựng khối lượng cơ bắp với các chương trình thể hình chuyên biệt tại FitPhysique.
                 </p>
-                <button class="btn btn__secondary">
+                <a href="Tuan_Folder/bodybuilding.php" class="btn btn__secondary">
                  READ MORE <i class="ri-arrow-right-line"></i>
-                </button>
+            </a>
               </div>
               <div class="session__card">
                 <h4>CARDIO</h4>
                 <p>
                  Tăng nhịp tim và cải thiện sức bền với các bài tập cardio năng động tại FitPhysique.
                 </p>
-                <button class="btn btn__secondary">
+                <a href="Tuan_Folder/cardio.php"class="btn btn__secondary">
                  READ MORE <i class="ri-arrow-right-line"></i>
-                </button>
+            </a>
               </div>
               <div class="session__card">
                 <h4>FITNESS</h4>
                 <p>
                  Tiếp cận thể dục toàn diện với các chương trình fitness phong phú và đa dạng tại FitPhysique.
                 </p>
-                <button class="btn btn__secondary">
+                <a href="Tuan_Folder/fitness.php" class="btn btn__secondary">
                  READ MORE <i class="ri-arrow-right-line"></i>
-                </button>
+            </a>
               </div>
               <div class="session__card">
                 <h4>CROSSFIT</h4>
                 <p>
                  Trải nghiệm bài tập toàn thân đỉnh cao với các lớp CrossFit cường độ cao tại FitPhysique.
                 </p>
-                <button class="btn btn__secondary">
+                <a href="Tuan_Folder/crossfit.php" class="btn btn__secondary">
                  READ MORE <i class="ri-arrow-right-line"></i>
-                </button>
+            </a>
               </div>
         </section>
 
@@ -346,13 +350,13 @@ session_start();
                 <li>
                   <a href="#">
                     <span><i class="ri-map-pin-2-fill"></i></span>
-                    123 Đường Chính<br />Sunrise Valley, Evergreen Heights
+                    243 Đường Nguyễn Xiển<br />Thanh Xuân, Hà Nội
                   </a>
                 </li>
                 <li>
                   <a href="#">
                     <span><i class="ri-phone-fill"></i></span>
-                    +91 9876543210
+                    +84 985772330
                   </a>
                 </li>
                 <li>
@@ -399,9 +403,38 @@ session_start();
             Copyright © 2024 Web Design Mastery. All rights reserved.
           </div>
         </footer>
+        <div class="chat-toggle-btn" onclick="toggleChat()">
+    <i class="ri-messenger-fill"></i>
+</div>
+
+<div class="chat-box-container" id="chatBox">
+    <div class="chat-header">
+        <div class="chat-title">
+            <i class="ri-customer-service-2-fill"></i> FitPhysique Support
+        </div>
+        <div class="chat-close" onclick="toggleChat()">
+            <i class="ri-close-line"></i>
+        </div>
+    </div>
+
+    <div class="chat-body" id="chatBody">
+        <div class="message bot-message">
+            <p><?php echo $chat_greeting; ?>, tôi có thể giúp gì cho bạn?</p>
+        </div>
         
+        <div class="chat-options" id="chatOptions">
+            <button onclick="selectOption('Tư vấn')">Tư vấn sức khỏe</button>
+            <button onclick="selectOption('Gói tập')">Thông tin gói tập</button>
+            <button onclick="selectOption('Gặp Admin')">Chat với người thật</button>
+        </div>
+    </div>
     
-        
+    <div class="chat-footer">
+    <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." onkeypress="handleEnter(event)">
+    <button onclick="sendMessage()"><i class="ri-send-plane-fill"></i></button>
+</div>
+</div>
+         
         <script src="URLjs/scrollreveal.js"></script>
         <script src="URLjs/swiper-bundle.min.js"></script>
         <script src="URLjs/jquery.min.js"></script>

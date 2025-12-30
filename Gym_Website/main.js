@@ -120,7 +120,7 @@ const swiper = new Swiper(".swiper", {
     }
 
   })
-
+// gửi thông tin email
   function sendEmail(){
     Email.send({
         Host : "smtp.gmail.com",
@@ -134,4 +134,107 @@ const swiper = new Swiper(".swiper", {
       message => alert(message)
     );
   }
+
+// Chat với admin
+
+// --- BIẾN TRẠNG THÁI ---
+    var daXinSo = false; // Mặc định là chưa xin số
+
+    // 1. Toggle Chat
+    function toggleChat() {
+        document.getElementById("chatBox").classList.toggle("active");
+    }
+
+    // 2. Xử lý khi chọn nút có sẵn
+    function selectOption(option) {
+        addUserMessage(option);
+        document.getElementById("chatOptions").style.display = 'none';
+        
+        setTimeout(function() {
+            var botReply = getBotResponse(option);
+            // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
+            if (botReply) {
+                addBotMessage(botReply);
+            }
+        }, 1000);
+    }
+
+    // 3. Gửi tin nhắn
+    function sendMessage() {
+        var input = document.getElementById("chatInput");
+        var text = input.value.trim();
+        
+        if (text !== "") {
+            addUserMessage(text);
+            input.value = ""; 
+            
+            setTimeout(function() {
+                var botReply = getBotResponse(text);
+                // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
+                if (botReply) {
+                    addBotMessage(botReply);
+                }
+            }, 1000);
+        }
+    }
+
+    function handleEnter(event) {
+        if (event.key === "Enter") sendMessage();
+    }
+
+    function addUserMessage(text) {
+        var chatBody = document.getElementById("chatBody");
+        var userHtml = '<div class="message user-message"><p>' + text + '</p></div>';
+        chatBody.insertAdjacentHTML('beforeend', userHtml);
+        scrollToBottom();
+    }
+
+    function addBotMessage(text) {
+        var chatBody = document.getElementById("chatBody");
+        var botHtml = '<div class="message bot-message"><p>' + text + '</p></div>';
+        chatBody.insertAdjacentHTML('beforeend', botHtml);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        var chatBody = document.getElementById("chatBody");
+        chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // --- BỘ NÃO CỦA BOT ---
+    function getBotResponse(input) {
+        input = input.toLowerCase();
+
+        // 1. Kiểm tra từ khóa (Vẫn trả lời bình thường)
+        if (input.includes("tư vấn") || input.includes("sức khỏe")) {
+            return "Để được tư vấn kỹ hơn, bạn cho mình xin chỉ số Chiều cao/Cân nặng nhé?";
+        } 
+        else if (input.includes("giá") || input.includes("tiền") || input.includes("chi phí")) {
+            return "Bên mình có gói Standard (500k), Professional (1tr350) và Ultimate. Bạn muốn xem chi tiết gói nào?";
+        } 
+        else if (input.includes("gói tập") || input.includes("standard")) {
+            return "Gói Standard 500k/tháng bao gồm Gym, Yoga và tủ đồ cá nhân ạ.";
+        }
+        else if (input.includes("địa chỉ") || input.includes("ở đâu")) {
+            return "Phòng tập ở 123 Đường Chính, Sunrise Valley bạn nhé!";
+        }
+        else if (input.includes("chào") || input.includes("hi") || input.includes("hello")) {
+            return "Chào bạn, chúc bạn một ngày tràn đầy năng lượng! Mình giúp gì được cho bạn?";
+        }
+        else if (input.includes("gặp admin") || input.includes("người thật")) {
+            return "Đã nhận yêu cầu. Admin sẽ liên hệ lại ngay.";
+        }
+        
+        // 2. KHÔNG HIỂU -> Xử lý im lặng sau lần đầu
+        else {
+            if (daXinSo == false) {
+                // Lần đầu: Trả lời câu xin số
+                daXinSo = true; 
+                return "Cảm ơn bạn đã nhắn tin. Hiện tại Admin đang bận, vui lòng để lại SĐT để bên mình gọi lại tư vấn nhé!";
+            } else {
+                // Lần sau: Trả về null -> IM LẶNG TUYỆT ĐỐI
+                return null; 
+            }
+        }
+    }
   

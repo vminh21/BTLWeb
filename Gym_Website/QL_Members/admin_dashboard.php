@@ -10,20 +10,35 @@ if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
 // 2. KẾT NỐI DATABASE
 $conn = new mysqli("localhost", "root", "", "GymManagement");
 if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
-$conn->set_charset("utf8");
+$conn->set_charset("utf8mb4");
 
-// 3. LẤY DỮ LIỆU THỐNG KÊ
+// --- 3. XỬ LÝ TÌM KIẾM ---
+$search_name = isset($_GET['search_name']) ? $conn->real_escape_string($_GET['search_name']) : '';
+$search_type = isset($_GET['search_type']) ? $conn->real_escape_string($_GET['search_type']) : '';
+
+// Xây dựng điều kiện WHERE động
+$where_clauses = ["1=1"];
+if (!empty($search_name)) {
+    $where_clauses[] = "m.full_name LIKE '%$search_name%'";
+}
+if (!empty($search_type)) {
+    $where_clauses[] = "t.transaction_type = '$search_type'";
+}
+$where_sql = implode(" AND ", $where_clauses);
+
+// 4. LẤY DỮ LIỆU THỐNG KÊ (Tính toán dựa trên bộ lọc nếu muốn, ở đây tôi giữ nguyên tổng quan)
 $total_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM transactions")->fetch_row()[0] ?? 0;
-$active_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date >= CURDATE() AND member_id IN (SELECT member_id FROM transactions)")->fetch_row()[0] ?? 0;
-$expired_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date < CURDATE() AND member_id IN (SELECT member_id FROM transactions)")->fetch_row()[0] ?? 0;
+$active_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date >= CURDATE()")->fetch_row()[0] ?? 0;
+$expired_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date < CURDATE()")->fetch_row()[0] ?? 0;
 $total_revenue = $conn->query("SELECT SUM(amount) FROM transactions")->fetch_row()[0] ?? 0;
 
-// Lấy danh sách giao dịch (có lấy thêm end_date từ bảng subscriptions để đổ vào form sửa)
+// 5. TRUY VẤN DANH SÁCH GIAO DỊCH (Có áp dụng bộ lọc)
 $sql_recent = "SELECT t.*, m.full_name, 
               (SELECT MAX(ms.end_date) FROM member_subscriptions ms WHERE ms.member_id = t.member_id) AS end_date 
               FROM transactions t 
               JOIN members m ON t.member_id = m.member_id 
-              ORDER BY t.transaction_date DESC LIMIT 10";
+              WHERE $where_sql
+              ORDER BY t.transaction_date DESC LIMIT 20";
 $recent_transactions = $conn->query($sql_recent);
 ?>
 
@@ -34,7 +49,7 @@ $recent_transactions = $conn->query($sql_recent);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - FitPhysique</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="admin_dashboard.css">
+    <link rel="stylesheet" href="admin_dashboard.css?v=1.1">
 </head>
 <body>
 
@@ -43,8 +58,9 @@ $recent_transactions = $conn->query($sql_recent);
         <ul>
             <li><a href="admin_dashboard.php" class="active"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
             <li><a href="members.php"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
-            <li><a href="packages.php"><i class='bx bxs-credit-card'></i> Gói tập & Hạn</a></li>
-            <li><a href="reports.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+            <li><a href="thongke.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+            <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Lịch sử giao dịch</a></li>
+            <li><a href="admin_thongbao.php"><i class='bx bxs-bell'></i> Thông báo</a></li>
             <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
     </div>
@@ -53,7 +69,7 @@ $recent_transactions = $conn->query($sql_recent);
         <div class="header">
             <h1>Tổng quan hệ thống</h1>
             <div class="user-info">
-                <span>Xin chào, <strong><?= htmlspecialchars($_SESSION['full_name']) ?></strong></span>
+                <span>Xin chào, <strong><?= htmlspecialchars($_SESSION['full_name'] ?? 'Admin') ?></strong></span>
                 <i class='bx bxs-user-circle'></i>
             </div>
         </div>
@@ -65,9 +81,34 @@ $recent_transactions = $conn->query($sql_recent);
             <div class="card"><div class="card-info"><h3><?= number_format($total_revenue, 0, ',', '.') ?>đ</h3><p>Doanh Thu</p></div><div class="card-icon gold"><i class='bx bxs-wallet'></i></div></div>
         </div>
 
+        <div class="search-bar-container">
+    <form method="GET" action="admin_dashboard.php">
+        <div class="search-group">
+            <i class='bx bx-search'></i>
+            <input type="text" name="search_name" placeholder="Nhập tên hội viên cần tìm..." value="<?= htmlspecialchars($search_name) ?>">
+        </div>
+        
+        <div class="filter-group">
+            <select name="search_type">
+                <option value="">-- Loại giao dịch --</option>
+                <option value="Registration" <?= $search_type == 'Registration' ? 'selected' : '' ?>>Đăng ký mới</option>
+                <option value="Renewal" <?= $search_type == 'Renewal' ? 'selected' : '' ?>>Gia hạn</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-submit-search">
+            <i class='bx bx-filter-alt'></i> Lọc dữ liệu
+        </button>
+
+        <?php if(!empty($search_name) || !empty($search_type)): ?>
+            <a href="admin_dashboard.php" class="btn-reset">Xóa lọc</a>
+        <?php endif; ?>
+    </form>
+</div>
+
         <div class="recent-transactions">
             <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Giao dịch gần đây</h2>
+                <h2>Danh sách giao dịch</h2>
                 <button type="button" id="btnOpenModal" class="btn-add-new">
                     <i class='bx bx-plus'></i> Thêm giao dịch
                 </button>
@@ -85,35 +126,41 @@ $recent_transactions = $conn->query($sql_recent);
                     </tr>
                 </thead>
                 <tbody>
-                <?php while ($row = $recent_transactions->fetch_assoc()): ?>
-                    <tr>
-                        <td>#<?= $row['transaction_id'] ?></td>
-                        <td><?= htmlspecialchars($row['full_name']) ?></td>
-                        <td><span class="status <?= $row['transaction_type'] == 'Registration' ? 'type-reg' : 'type-renew' ?>"><?= $row['transaction_type'] ?></span></td>
-                        <td><strong><?= number_format($row['amount'], 0, ',', '.') ?>đ</strong></td>
-                        <td><?= date("d/m/Y H:i", strtotime($row['transaction_date'])) ?></td>
-                        <td><?= $row['end_date'] ? date("d/m/Y", strtotime($row['end_date'])) : '—' ?></td>
-                        <td>
-                            <a href="javascript:void(0)" class="btn-edit-trigger" 
-                               data-id="<?= $row['transaction_id'] ?>"
-                               data-memberid="<?= $row['member_id'] ?>"
-                               data-type="<?= $row['transaction_type'] ?>"
-                               data-amount="<?= $row['amount'] ?>"
-                               data-method="<?= $row['payment_method'] ?>"
-                               data-enddate="<?= $row['end_date'] ?>">
-                               <i class='bx bxs-edit' style="color:#3498db; cursor:pointer; font-size: 1.2rem;"></i>
-                            </a>
-                            <a href="transaction_handler.php?delete_id=<?= $row['transaction_id'] ?>" onclick="return confirm('Xác nhận xóa giao dịch này?')">
-                                <i class='bx bxs-trash' style="color:#e74c3c; margin-left: 10px; font-size: 1.2rem;"></i>
-                            </a>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
+                <?php if ($recent_transactions && $recent_transactions->num_rows > 0): ?>
+                    <?php while ($row = $recent_transactions->fetch_assoc()): ?>
+                        <tr>
+                            <td>#<?= $row['transaction_id'] ?></td>
+                            <td><?= htmlspecialchars($row['full_name']) ?></td>
+                            <td>
+                                <span class="status <?= $row['transaction_type'] == 'Registration' ? 'type-reg' : 'type-renew' ?>">
+                                    <?= $row['transaction_type'] == 'Registration' ? 'Đăng ký' : 'Gia hạn' ?>
+                                </span>
+                            </td>
+                            <td><strong><?= number_format($row['amount'], 0, ',', '.') ?>đ</strong></td>
+                            <td><?= date("d/m/Y H:i", strtotime($row['transaction_date'])) ?></td>
+                            <td><?= $row['end_date'] ? date("d/m/Y", strtotime($row['end_date'])) : '—' ?></td>
+                            <td>
+                                <a href="javascript:void(0)" class="btn-edit-trigger" 
+                                   data-id="<?= $row['transaction_id'] ?>"
+                                   data-memberid="<?= $row['member_id'] ?>"
+                                   data-type="<?= $row['transaction_type'] ?>"
+                                   data-amount="<?= $row['amount'] ?>"
+                                   data-enddate="<?= $row['end_date'] ?>">
+                                   <i class='bx bxs-edit' style="color:#3498db; cursor:pointer; font-size: 1.2rem;"></i>
+                                </a>
+                                <a href="transaction_handler.php?delete_id=<?= $row['transaction_id'] ?>" onclick="return confirm('Xác nhận xóa giao dịch này?')">
+                                    <i class='bx bxs-trash' style="color:#e74c3c; margin-left: 10px; font-size: 1.2rem;"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr><td colspan="7" style="text-align: center; padding: 20px;">Không tìm thấy dữ liệu phù hợp.</td></tr>
+                <?php endif; ?>
                 </tbody>
             </table>
         </div>
     </div>
-
     <div id="addTransactionModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header"><h2>Thêm Giao Dịch Mới</h2><span class="close-modal">&times;</span></div>
@@ -138,9 +185,14 @@ $recent_transactions = $conn->query($sql_recent);
                     <input type="date" name="end_date" required min="<?= date('Y-m-d') ?>">
                 </div>
                 <div class="form-group">
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" name="amount" required>
-                </div>
+    <label>Gói tập & Số tiền (VNĐ):</label>
+    <select name="amount" id="amountSelect" required>   
+        <option value="">-- Chọn gói tập --</option>
+        <option value="500000" >Gói 1 tháng - 500.000đ</option>
+        <option value="1350000" >Gói 3 tháng - 1.350.000đ</option>
+        <option value="5000000" >Gói 1 năm - 5.000.000đ</option>
+    </select>
+</div>
                 <div class="form-group">
                     <label>Loại & Phương thức:</label>
                     <div style="display: flex; gap: 10px;">

@@ -63,6 +63,7 @@ body {
 
 .logout {
   margin-top: 50px;
+  color: red;
 }
 
 /* MAIN CONTENT */
@@ -280,7 +281,7 @@ table td {
 
 /* Nút thêm mới trên Dashboard */
 .btn-add-new {
-  background: #ff6b6b;
+  background: #27ae60;
   color: #fff;
   border: none;
   padding: 10px 18px;
@@ -306,3 +307,169 @@ table td {
   border-radius: 8px;
   cursor: pointer;
 }
+/* --- PHẦN TÌM KIẾM (SEARCH BAR) NÂNG CẤP --- */
+.search-bar-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-bottom: 25px;
+  border: 1px solid #f0f0f0;
+}
+
+.search-bar-container form {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap; /* Tự động xuống dòng trên màn hình nhỏ */
+}
+
+/* Nhóm ô nhập liệu có icon */
+.search-group {
+  position: relative;
+  flex: 2; /* Chiếm nhiều không gian nhất */
+  min-width: 250px;
+}
+
+.search-group i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.search-group input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  outline: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-group input:focus {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+}
+
+/* Nhóm Select filter */
+.filter-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  outline: none;
+  font-size: 14px;
+}
+
+/* Nút tìm kiếm */
+.btn-submit-search {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-submit-search:hover {
+  background-color: #fa5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+}
+
+/* Nút xóa lọc */
+.btn-reset {
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 10px;
+  transition: 0.3s;
+}
+
+.btn-reset:hover {
+  color: #e74c3c;
+  text-decoration: underline;
+}
+
+/* Ô chọn loại (Select) */
+.filter-group {
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Nút Tìm kiếm đỏ cam */
+.btn-submit-search {
+  background-color: #ff6b6b;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-submit-search:hover {
+  background-color: #fa5252;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+}
+
+/* Nút Xóa lọc */
+.btn-reset {
+  color: #888;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 10px;
+  transition: 0.3s;
+}
+
+.btn-reset:hover {
+  color: #e74c3c;
+  text-decoration: underline;
+}
+
+/* Điều chỉnh lại bảng để khớp với giao diện */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.bg-blue {
+  background-color: #e3fcef;
+  color: #00b894;
+} /* Registration */
+.bg-purple {
+  background-color: #fff0c2;
+  color: #f39c12;
+} /* Renewal */
