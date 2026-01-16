@@ -2,7 +2,6 @@
 session_start();
 require_once 'connectdb.php';
 
-// Nếu chưa có OTP trong Session (truy cập trái phép) -> Quay về trang quên mật khẩu
 if (!isset($_SESSION['reset_otp']) || !isset($_SESSION['reset_email'])) {
     header("Location: forgot_password.php");
     exit();
@@ -19,34 +18,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $server_otp    = $_SESSION['reset_otp'];
     $email_to_reset= $_SESSION['reset_email'];
     
-    // 1. Kiểm tra các trường trống (vì đã tắt novalidate)
     if (empty($user_otp) || empty($new_pass) || empty($confirm_pass)) {
         $error_message = "Vui lòng nhập đầy đủ tất cả các trường.";
     } 
-    // 2. Kiểm tra OTP
     elseif ($user_otp != $server_otp) {
         $error_message = "Mã xác thực (OTP) không chính xác.";
     } 
-    // 3. Kiểm tra độ dài mật khẩu (tối thiểu 6 ký tự chẳng hạn)
     elseif (strlen($new_pass) < 6) {
         $error_message = "Mật khẩu mới phải có ít nhất 6 ký tự.";
     }
-    // 4. Kiểm tra mật khẩu khớp nhau
     elseif ($new_pass !== $confirm_pass) {
         $error_message = "Mật khẩu xác nhận không trùng khớp.";
     }
-    // 5. Thực hiện đổi mật khẩu (Dùng Prepared Statement)
     else {
-        // Khuyên dùng password_hash để bảo mật, nhưng ở đây tôi giữ logic UPDATE cho ông
-        // Nếu DB ông dùng MD5 thì: $hashed_pass = md5($new_pass);
-        // Ở đây tôi dùng pass thuần hoặc escape tùy cấu trúc cũ của ông
         $safe_pass = $conn->real_escape_string($new_pass);
         
         $stmt = $conn->prepare("UPDATE members SET password = ? WHERE email = ?");
         $stmt->bind_param("ss", $safe_pass, $email_to_reset);
         
         if ($stmt->execute()) {
-            // Xóa session để hoàn tất quá trình
             unset($_SESSION['reset_otp']);
             unset($_SESSION['reset_email']);
             

@@ -89,14 +89,14 @@ const swiper = new Swiper(".swiper", {
     let height_status=false, weight_status=false;
 
     if(height === '' || isNaN(height) || height<=0){
-    document.getElementById('height_error').innerHTML = 'Please provide a valid height';
+    document.getElementById('height_error').innerHTML = 'Điền chiều cao hợp lệ';
     }else{
         document.getElementById('height_error').innerHTML = '';    
         height_status=true;
     }
     
     if(weight === '' || isNaN(weight) || weight<=0){
-        document.getElementById('weight_error').innerHTML = 'Please provide a valid weight';
+        document.getElementById('weight_error').innerHTML = 'Điền cân nặng hợp lệ';
         }else{
             document.getElementById('weight_error').innerHTML = '';    
             weight_status=true;
@@ -137,29 +137,23 @@ const swiper = new Swiper(".swiper", {
 
 // Chat với admin
 
-// --- BIẾN TRẠNG THÁI ---
-    var daXinSo = false; // Mặc định là chưa xin số
-
-    // 1. Toggle Chat
+    var daXinSo = false;
     function toggleChat() {
         document.getElementById("chatBox").classList.toggle("active");
     }
-
-    // 2. Xử lý khi chọn nút có sẵn
     function selectOption(option) {
         addUserMessage(option);
         document.getElementById("chatOptions").style.display = 'none';
         
         setTimeout(function() {
             var botReply = getBotResponse(option);
-            // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
             if (botReply) {
                 addBotMessage(botReply);
             }
         }, 1000);
     }
 
-    // 3. Gửi tin nhắn
+    //  Gửi tin nhắn
     function sendMessage() {
         var input = document.getElementById("chatInput");
         var text = input.value.trim();
@@ -170,7 +164,6 @@ const swiper = new Swiper(".swiper", {
             
             setTimeout(function() {
                 var botReply = getBotResponse(text);
-                // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
                 if (botReply) {
                     addBotMessage(botReply);
                 }
@@ -201,11 +194,11 @@ const swiper = new Swiper(".swiper", {
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    // --- BỘ NÃO CỦA BOT ---
+    // --- Chat Box ---
     function getBotResponse(input) {
         input = input.toLowerCase();
 
-        // 1. Kiểm tra từ khóa (Vẫn trả lời bình thường)
+        // Kiểm tra từ khóa
         if (input.includes("tư vấn") || input.includes("sức khỏe")) {
             return "Để được tư vấn kỹ hơn, bạn cho mình xin chỉ số Chiều cao/Cân nặng nhé?";
         } 
@@ -224,15 +217,11 @@ const swiper = new Swiper(".swiper", {
         else if (input.includes("gặp admin") || input.includes("người thật")) {
             return "Đã nhận yêu cầu. Admin sẽ liên hệ lại ngay.";
         }
-        
-        // 2. KHÔNG HIỂU -> Xử lý im lặng sau lần đầu
         else {
             if (daXinSo == false) {
-                // Lần đầu: Trả lời câu xin số
                 daXinSo = true; 
                 return "Cảm ơn bạn đã nhắn tin. Hiện tại Admin đang bận, vui lòng để lại SĐT để bên mình gọi lại tư vấn nhé!";
             } else {
-                // Lần sau: Trả về null -> IM LẶNG TUYỆT ĐỐI
                 return null; 
             }
         }

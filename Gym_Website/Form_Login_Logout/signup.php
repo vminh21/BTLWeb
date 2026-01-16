@@ -2,7 +2,6 @@
 session_start();
 require_once 'connectdb.php';
 
-// DANH SÁCH TỈNH THÀNH
 $cities = [
     "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Hải Phòng", "Cần Thơ", 
     "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
@@ -23,50 +22,34 @@ $error_message = "";
 $success_message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // 1. Lấy dữ liệu từ form
     $full_name = trim($_POST['fullname']);
     $email = trim($_POST['email']);
     $phone = trim($_POST['phone']);
     $address = isset($_POST['address']) ? trim($_POST['address']) : ""; 
-    $gender = isset($_POST['gender']) ? trim($_POST['gender']) : ""; // <--- MỚI: Lấy giới tính
+    $gender = isset($_POST['gender']) ? trim($_POST['gender']) : "";
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // --- VALIDATION (PHP XỬ LÝ TOÀN BỘ) ---
-
-    // 1. KIỂM TRA RỖNG
+    // --- VALIDATION ---
     if (empty($full_name) || empty($email) || empty($phone) || empty($address) || empty($gender) || empty($password) || empty($confirm_password)) {
         $error_message = "Vui lòng nhập đầy đủ thông tin!";
     }
-
-    // 2. Validate ĐỊNH DẠNG EMAIL
     elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Định dạng Email không hợp lệ (ví dụ: abc@gmail.com)!";
     }
-
-    // 3. Validate Tên 
     elseif (strlen($full_name) < 5) {
         $error_message = "Tên hiển thị phải có ít nhất 5 ký tự!";
     }
-
-    // 4. Validate SĐT (Số)
     elseif (!preg_match('/^[0-9]{10,}$/', $phone)) {
         $error_message = "Số điện thoại không hợp lệ (phải là số, ít nhất 10 số)!";
     }
-
-    // 5. Validate Mật khẩu (Độ mạnh)
     elseif (strlen($password) < 8 || !preg_match('/[a-zA-Z]/', $password) || !preg_match('/[0-9]/', $password)) {
         $error_message = "Mật khẩu yếu! Cần ít nhất 8 ký tự, bao gồm cả chữ và số.";
     }
-
-    // 6. Validate Khớp mật khẩu
     elseif ($password !== $confirm_password) {
         $error_message = "Mật khẩu nhập lại không khớp!";
     } 
-    
-    // NẾU KHÔNG CÓ LỖI GÌ THÌ MỚI LÀM VIỆC VỚI DATABASE
     else {
-        // Escape dữ liệu để tránh lỗi SQL Injection
         $safe_email = $conn->real_escape_string($email);
         
         // Kiểm tra xem Email đã tồn tại chưa

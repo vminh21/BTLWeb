@@ -14,24 +14,23 @@ function getSavedAccounts() {
 
 function saveAccountToCookie($username, $password) {
     $accounts = getSavedAccounts();
-    $accounts[$username] = $password; // Thêm hoặc cập nhật pass
+    $accounts[$username] = $password;
     setcookie('saved_accounts', json_encode($accounts), time() + (86400 * 30), "/");
 }
 
 function removeAccountFromCookie($username) {
     $accounts = getSavedAccounts();
     if (isset($accounts[$username])) {
-        unset($accounts[$username]); // Xóa user này khỏi danh sách
+        unset($accounts[$username]); 
         setcookie('saved_accounts', json_encode($accounts), time() + (86400 * 30), "/");
     }
 }
-// -----------------------------------------------------
 
 // XỬ LÝ KHI FORM ĐƯỢC SUBMIT
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $input_user = isset($_POST['username']) ? trim($_POST['username']) : '';
     $input_pass = isset($_POST['password']) ? trim($_POST['password']) : '';
-    $remember   = isset($_POST['remember_me']); // Kiểm tra checkbox
+    $remember   = isset($_POST['remember_me']); 
 
     // VALIDATE
     if (empty($input_user) && empty($input_pass)) {
@@ -61,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Logic Admin
         if ($result_admin->num_rows > 0) {
             $row = $result_admin->fetch_assoc();
-            $_SESSION['admin_id']  = $row['admin_id']; // QUAN TRỌNG: Lưu ID Admin
+            $_SESSION['admin_id']  = $row['admin_id'];
             $_SESSION['full_name'] = $row['full_name'];
             $_SESSION['role']      = 'admin';
             $redirect_url          = "../QL_Members/admin_dashboard.php";
@@ -70,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Logic Member
         elseif ($result_member->num_rows > 0) {
             $row = $result_member->fetch_assoc();
-            $_SESSION['member_id'] = $row['member_id']; // QUAN TRỌNG: Lưu ID Member
+            $_SESSION['member_id'] = $row['member_id']; 
             $_SESSION['full_name'] = $row['full_name'];
             $_SESSION['role']      = 'member';
             $redirect_url          = "../index.php";
@@ -80,7 +79,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error_message = "Tài khoản hoặc mật khẩu không chính xác!";
         }
 
-        // Xử lý Cookie sau khi Login thành công
         if ($login_success) {
             if ($remember) {
                 saveAccountToCookie($input_user, $input_pass);
@@ -94,7 +92,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 $conn->close();
 
-// --- CHUẨN BỊ DỮ LIỆU ĐỂ JS AUTO-FILL ---
 $saved_accounts = getSavedAccounts();
 $json_accounts_for_js = json_encode($saved_accounts);
 ?>
@@ -153,21 +150,19 @@ $json_accounts_for_js = json_encode($saved_accounts);
   </div>
 
   <script>
-      // Lấy dữ liệu từ PHP
       const savedAccounts = <?php echo $json_accounts_for_js; ?>;
       
       const userInput = document.getElementById('usernameInput');
       const passInput = document.getElementById('passwordInput');
       const rememberCheck = document.getElementById('rememberCheck');
 
-      // Khi gõ hoặc chọn email -> tự điền pass
+
       userInput.addEventListener('input', function() {
           const email = this.value;
           if (savedAccounts.hasOwnProperty(email)) {
               passInput.value = savedAccounts[email];
               rememberCheck.checked = true;
           } else {
-              // Nếu sửa email khác thì xóa pass cũ đi
               passInput.value = ''; 
               rememberCheck.checked = false;
           }

@@ -5,7 +5,7 @@ session_start();
 //     header("Location: Form_Login_Logout/Login.php");
 //     exit(); 
 // }
-$chat_greeting = "Chào bạn"; // Mặc định
+$chat_greeting = "Chào bạn";
     if (isset($_SESSION['full_name'])) {
         $chat_greeting = "Chào " . htmlspecialchars($_SESSION['full_name']);
     }
@@ -148,11 +148,11 @@ $chat_greeting = "Chào bạn"; // Mặc định
             <h2 class="section__header">MEET OUR TRAINERS</h2>
             <div class="trainer__grid">
                 <div class="trainer__card">
-                    <img src="assets/trainer-1.jpg" alt="trainer" />
-                    <h4>DAVID WILLIAMS</h4>
+                    <img src="assets/pthiepcuta.jpg" alt="trainer" />
+                    <h4>Hiệp Cử Tạ</h4>
                     <p>HLV Thể Hình</p>
                     <div class="trainer__socials">
-                      <a href="#"><i class="ri-facebook-fill"></i></a>
+                      <a href="https://www.facebook.com/hoang.hiep.853060"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
                       <a href="#"><i class="ri-youtube-fill"></i></a>
                     </div>

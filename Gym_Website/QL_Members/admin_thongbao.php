@@ -82,6 +82,8 @@ $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at D
         <ul>
             <li><a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
             <li><a href="members.php"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
+            <li><a href="thongke.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
+            <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Lịch sử giao dịch</a></li>
             <li><a href="admin_thongbao.php" class="active"><i class='bx bxs-bell'></i> Thông báo</a></li>
             <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
         </ul>
