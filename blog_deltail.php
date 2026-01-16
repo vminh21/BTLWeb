@@ -285,18 +285,18 @@ Trong 30 phút: Bổ sung carbohydrate và protein (sữa chua, sữa, trái câ
     if (isset($static_blogs[$id])) {
     $blog = $static_blogs[$id];
 } else {
-    // Truy vấn database nếu ID không nằm trong 1-4
+    
     $sql = "SELECT * FROM notifications WHERE notification_id = $id";
     $result = mysqli_query($conn, $sql);
     $blog = mysqli_fetch_assoc($result);
 
-    // Xử lý ảnh mặc định cho thông báo nếu database không có ảnh
+    
     if ($blog) {
         if (empty($blog['image']) || $blog['image'] == 'NULL') {
             $blog['image'] = "banner-3.png"; // Ảnh mặc định
         }
     } else {
-        // Nếu ID hoàn toàn không tồn tại, quay về bài 1
+        
         $blog = $static_blogs[1];
     }
 }
@@ -349,14 +349,9 @@ Trong 30 phút: Bổ sung carbohydrate và protein (sữa chua, sữa, trái câ
     <?php 
         // Lấy nội dung gốc
         $content = $blog['content'];
-
-        // Bước 1: Tự động in đậm các dòng bắt đầu bằng số (ví dụ: 1. Tầm quan trọng...)
+        // Tự động in đậm các dòng bắt đầu bằng số 
         $content = preg_replace('/^(\d+\..*)$/m', '<b>$1</b>', $content);
-
-        // Bước 2: In đậm các từ nằm giữa 2 dấu * (ví dụ: *Protein*)
-        $content = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $content);
-
-        // Hiển thị ra màn hình
+        $content = preg_replace('/\*(.*?)\*/', '<b>$1</b>', $content); 
         echo $content; 
     ?>
 </div>
