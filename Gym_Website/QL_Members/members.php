@@ -1,51 +1,4 @@
-<?php
-session_start();
-// 1. KẾT NỐI & KIỂM TRA QUYỀN
-$conn = new mysqli("localhost", "root", "", "gymmanagement");
-$conn->set_charset("utf8mb4");
-
-if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php"); exit();
-}
-
-// 2. LẤY DỮ LIỆU BỘ LỌC TỪ URL
-$search = isset($_GET['search']) ? $conn->real_escape_string($_GET['search']) : '';
-$filter_package = isset($_GET['filter_package']) ? $_GET['filter_package'] : '';
-$filter_status = isset($_GET['filter_status']) ? $_GET['filter_status'] : '';
-
-// 3. XÂY DỰNG CÂU LỆNH SQL CÓ ĐIỀU KIỆN
-$where_clauses = ["1=1"];
-
-if (!empty($search)) {
-    $where_clauses[] = "m.full_name LIKE '%$search%'";
-}
-if (!empty($filter_package)) {
-    $where_clauses[] = "p.package_id = '$filter_package'";
-}
-if (!empty($filter_status)) {
-    if ($filter_status == 'Expired') {
-        $where_clauses[] = "ms.end_date < CURDATE()"; 
-    } else {
-        $where_clauses[] = "m.status = '$filter_status'"; 
-    }
-}
-
-$where_sql = implode(" AND ", $where_clauses);
-
-$sql = "SELECT m.*, m.status as m_status, ms.start_date, ms.end_date, p.package_name, p.package_id
-        FROM members m
-        LEFT JOIN (
-            SELECT * FROM member_subscriptions 
-            WHERE subscription_id IN (SELECT MAX(subscription_id) FROM member_subscriptions GROUP BY member_id)
-        ) ms ON m.member_id = ms.member_id
-        LEFT JOIN membership_packages p ON ms.package_id = p.package_id
-        WHERE $where_sql
-        ORDER BY m.member_id DESC";
-
-$result = $conn->query($sql);
-$today = date('Y-m-d');
-?>
-
+<?php include 'member_action.php'; ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -63,8 +16,10 @@ $today = date('Y-m-d');
         <li><a href="admin_dashboard.php"><i class='bx bxs-dashboard'></i> Dashboard</a></li>
         <li><a href="members.php" class="active"><i class='bx bxs-user-detail'></i> Quản lý thành viên</a></li>
         <li><a href="thongke.php"><i class='bx bxs-report'></i> Báo cáo</a></li>
-        <li><a href="admin_thongke.php"><i class='bx bxs-report'></i> Lịch sử giao dịch</a></li>
         <li><a href="admin_thongbao.php"><i class='bx bxs-bell'></i> Thông báo</a></li>
+        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+        <li><a href="admin_staff.php"><i class='bx bxs-group'></i> Quản lí nhân sự</a></li>
+    <?php endif; ?>
         <li class="logout"><a href="logout1.php"><i class='bx bxs-log-out'></i> Đăng xuất</a></li>
     </ul>
 </div>
@@ -138,7 +93,12 @@ $today = date('Y-m-d');
                     <td><small><?= $row['end_date'] ? date("d/m/Y", strtotime($row['end_date'])) : '—' ?></small></td>
                     <td>
                         <span class="status <?= ($row['m_status'] == 'Inactive' || $is_expired) ? 'type-renew' : 'type-reg' ?>">
-                            <?= $row['m_status'] == 'Inactive' ? 'Bị khóa' : ($is_expired ? 'Hết hạn' : 'Hoạt động') ?>
+                            <?php 
+                                if ($row['m_status'] == 'Inactive' && $is_expired) { echo "Bị khóa & Hết hạn"; } 
+                                elseif ($row['m_status'] == 'Inactive') { echo "Bị khóa"; } 
+                                elseif ($is_expired) { echo "Hết hạn"; } 
+                                else { echo "Hoạt động"; }
+                            ?>
                         </span>
                     </td>
                     <td>
@@ -147,11 +107,11 @@ $today = date('Y-m-d');
                                 <i class='bx bxs-edit icon-edit'></i>
                             </a>
                             
-                            <form action="member_action.php" method="POST">
+                            <form action="member_action.php" method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="toggle_status">
                                 <input type="hidden" name="member_id" value="<?= $row['member_id'] ?>">
                                 <input type="hidden" name="current_status" value="<?= $row['m_status'] ?>">
-                                <button type="submit">
+                                <button type="submit" style="background:none; border:none; cursor:pointer; padding:0;">
                                     <i class='bx <?= $row['m_status']=='Active'?'bxs-lock-open':'bxs-lock' ?> icon-lock' 
                                        style="color:<?= $row['m_status']=='Active'?'#2ecc71':'#f1c40f' ?>;"></i>
                                 </button>

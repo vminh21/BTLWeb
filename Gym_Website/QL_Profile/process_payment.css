@@ -1,0 +1,160 @@
+/* File: process_payment.css */
+:root {
+    --primary: #d92027;       /* Màu đỏ chủ đạo */
+    --primary-dark: #b01217;
+    --bg-body: #f0f2f5;
+    --text-dark: #1f2937;
+    --text-gray: #6b7280;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+    background: #eef2f6;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+    color: var(--text-dark);
+}
+
+.payment-container {
+    background: var(--white);
+    width: 100%;
+    max-width: 420px;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px -10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- HEADER --- */
+.header {
+    background: var(--primary);
+    padding: 25px;
+    text-align: center;
+    color: var(--white);
+}
+
+.header-icon {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
+
+.header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.header p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* --- BODY --- */
+.body {
+    padding: 30px;
+    text-align: center;
+}
+
+.amount-box {
+    margin-bottom: 25px;
+}
+
+.amount-box .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.amount-box .amount {
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+/* --- QR WRAPPER --- */
+.qr-wrapper {
+    background: #fff;
+    padding: 15px;
+    border: 2px dashed #e5e7eb;
+    border-radius: 16px;
+    display: inline-block;
+    margin-bottom: 25px;
+}
+
+.qr-img {
+    width: 100%;
+    max-width: 220px;
+    display: block;
+    border-radius: 8px;
+}
+
+/* --- INFO LIST --- */
+.info-list {
+    text-align: left;
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 25px;
+    border: 1px solid #f3f4f6;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.info-item:last-child { margin-bottom: 0; }
+
+.info-label { color: var(--text-gray); font-weight: 500; }
+.info-value { font-weight: 700; color: var(--text-dark); }
+.info-value.highlight { color: var(--primary); }
+
+/* --- BUTTONS --- */
+.btn-confirm {
+    background: var(--primary);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-confirm:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(217, 32, 39, 0.3);
+}
+
+.btn-back {
+    background: transparent;
+    border: none;
+    color: var(--text-gray);
+    margin-top: 15px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.btn-back:hover { color: var(--text-dark); text-decoration: underline; }

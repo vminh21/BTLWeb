@@ -2,7 +2,6 @@ if (history.scrollRestoration) {
     history.scrollRestoration = 'manual';
 }
 
-// 2. Ép cuộn về 0 ngay khi tải xong
 window.onload = function() {
     window.scrollTo(0, 0);
 }
@@ -32,16 +31,16 @@ const scrollRevealOption = {
     duration: 1000,
 };
 
-//login
-
-// 1. Tìm cái nút bằng ID
 const loginBtn = document.getElementById("btn-login");
 
-// 2. Gắn sự kiện Click
-if (loginBtn) { // Kiểm tra xem nút có tồn tại không để tránh lỗi
+if (loginBtn) {
     loginBtn.addEventListener("click", () => {
-        // 3. Chuyển hướng sang trang login.php
-        window.location.href = "Form_Login_Logout/login.php";
+        const isLoggedIn = loginBtn.getAttribute("data-logged-in") === "true";
+        if (isLoggedIn) {
+            window.location.reload();
+        } else {
+            window.location.href = "Form_Login_Logout/login.php";
+        }
     });
 }
 
@@ -82,84 +81,79 @@ const swiper = new Swiper(".swiper", {
     },
   });  
   //Tính cân nặng chiều cao 
+  const resetBtn = document.getElementById('reset_btn');
+  resetBtn.addEventListener('click', function() {
+    
+    document.getElementById('height').value = '';
+    document.getElementById('weight').value = '';
+    if(document.getElementById('gender')) document.getElementById('gender').selectedIndex = 0;
+    
+    
+    document.getElementById('height_error').innerHTML = '';
+    document.getElementById('weight_error').innerHTML = '';
+    
+    if(document.getElementById('age')) {
+        document.getElementById('age').value = '';
+    }
+    height_status = false;
+    weight_status = false;
+    
+    
+    resultArea.innerHTML = '/ Kết quả: <span>Chưa có dữ liệu</span>';
+});
   bmiBtn.addEventListener("click", () => {
-    const height = parseInt(document.getElementById("height").value);
-    const weight = parseInt(document.getElementById("weight").value);
+    const height = parseFloat(document.getElementById("height").value);
+    const weight = parseFloat(document.getElementById("weight").value);
     const result = document.getElementById("output");
-    let height_status=false, weight_status=false;
+    let height_status = false, weight_status = false;
 
-    if(height === '' || isNaN(height) || height<=0){
-    document.getElementById('height_error').innerHTML = 'Please provide a valid height';
-    }else{
+    if (isNaN(height) || height <= 0) {
+        document.getElementById('height_error').innerHTML = 'Chiều cao không hợp lệ';
+    } else {
         document.getElementById('height_error').innerHTML = '';    
-        height_status=true;
+        height_status = true;
     }
     
-    if(weight === '' || isNaN(weight) || weight<=0){
-        document.getElementById('weight_error').innerHTML = 'Please provide a valid weight';
-        }else{
-            document.getElementById('weight_error').innerHTML = '';    
-            weight_status=true;
-        }
-
-    if(height_status && weight_status){
-    const bmi = (weight/((height*height)/10000)).toFixed(2);
-
-    if(bmi < 18.6){
-    result.innerHTML = 'Under weight : '+bmi;
-    }
-    else if(bmi > 24.9){
-    result.innerHTML = 'Over weight : '+bmi;
-    }
-    else{
-    result.innerHTML = 'Normal : '+bmi;
-    }
-    }else{
-    alert('The form has errors');
-    result.innerHTML = '';
+    if (isNaN(weight) || weight <= 0) {
+        document.getElementById('weight_error').innerHTML = 'Cân nặng không hợp lệ';
+    } else {
+        document.getElementById('weight_error').innerHTML = '';    
+        weight_status = true;
     }
 
-  })
-// gửi thông tin email
-  function sendEmail(){
-    Email.send({
-        Host : "smtp.gmail.com",
-        Username : "pallavi867709@gmail.com",
-        Password : "Pallavi@2005??",
-        To : 'pallavi867709@gmail.com',
-        From : document.getElementById("email").value,
-        Subject : "This is the subject",
-        Body : "And this is the body"
-    }).then(
-      message => alert(message)
-    );
-  }
+    if (height_status && weight_status) {
+        const bmi = (weight / ((height * height) / 10000)).toFixed(2);
+        let category = "";
+        if (bmi < 18.5) category = "Gầy";
+        else if (bmi <= 24.9) category = "Bình thường";
+        else if (bmi <= 29.9) category = "Tiền béo phì";
+        else category = "Béo phì";
 
+        result.innerHTML = `/ Kết quả: <span>${bmi} (${category})</span>`;
+    } else {
+        alert('Vui lòng kiểm tra lại thông tin!');
+        result.innerHTML = '';
+    }
+});
 // Chat với admin
 
-// --- BIẾN TRẠNG THÁI ---
-    var daXinSo = false; // Mặc định là chưa xin số
-
-    // 1. Toggle Chat
+    var daXinSo = false;
     function toggleChat() {
         document.getElementById("chatBox").classList.toggle("active");
     }
-
-    // 2. Xử lý khi chọn nút có sẵn
     function selectOption(option) {
         addUserMessage(option);
         document.getElementById("chatOptions").style.display = 'none';
         
         setTimeout(function() {
             var botReply = getBotResponse(option);
-            // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
             if (botReply) {
                 addBotMessage(botReply);
             }
         }, 1000);
     }
 
-    // 3. Gửi tin nhắn
+    //  Gửi tin nhắn
     function sendMessage() {
         var input = document.getElementById("chatInput");
         var text = input.value.trim();
@@ -170,7 +164,6 @@ const swiper = new Swiper(".swiper", {
             
             setTimeout(function() {
                 var botReply = getBotResponse(text);
-                // CHỈ TRẢ LỜI NẾU CÓ NỘI DUNG (Khác null)
                 if (botReply) {
                     addBotMessage(botReply);
                 }
@@ -201,11 +194,11 @@ const swiper = new Swiper(".swiper", {
         chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    // --- BỘ NÃO CỦA BOT ---
+    // --- Chat Box ---
     function getBotResponse(input) {
         input = input.toLowerCase();
 
-        // 1. Kiểm tra từ khóa (Vẫn trả lời bình thường)
+        // Kiểm tra từ khóa
         if (input.includes("tư vấn") || input.includes("sức khỏe")) {
             return "Để được tư vấn kỹ hơn, bạn cho mình xin chỉ số Chiều cao/Cân nặng nhé?";
         } 
@@ -221,18 +214,14 @@ const swiper = new Swiper(".swiper", {
         else if (input.includes("chào") || input.includes("hi") || input.includes("hello")) {
             return "Chào bạn, chúc bạn một ngày tràn đầy năng lượng! Mình giúp gì được cho bạn?";
         }
-        else if (input.includes("gặp admin") || input.includes("người thật")) {
-            return "Đã nhận yêu cầu. Admin sẽ liên hệ lại ngay.";
+        else if (input.includes("gặp nhân viên") || input.includes("nhân viên")) {
+            return "Đã nhận yêu cầu. Bạn có thể gọi đến hotline để xin tư vấn: 0985772330";
         }
-        
-        // 2. KHÔNG HIỂU -> Xử lý im lặng sau lần đầu
         else {
             if (daXinSo == false) {
-                // Lần đầu: Trả lời câu xin số
                 daXinSo = true; 
                 return "Cảm ơn bạn đã nhắn tin. Hiện tại Admin đang bận, vui lòng để lại SĐT để bên mình gọi lại tư vấn nhé!";
             } else {
-                // Lần sau: Trả về null -> IM LẶNG TUYỆT ĐỐI
                 return null; 
             }
         }

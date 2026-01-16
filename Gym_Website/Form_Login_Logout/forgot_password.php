@@ -51,14 +51,12 @@ function sendOTP($toEmail, $otpCode) {
 // Xử lý khi nhấn nút Gửi
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
-    
-    // 1. Kiểm tra rỗng và định dạng (Văn phong nghiêm túc)
+
     if (empty($email)) {
         $error_message = "Vui lòng nhập địa chỉ email của bạn.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = "Địa chỉ email không đúng định dạng. Vui lòng kiểm tra lại.";
     } else {
-        // 2. Kiểm tra email trong cơ sở dữ liệu
         $stmt = $conn->prepare("SELECT email FROM members WHERE email = ? LIMIT 1");
         $stmt->bind_param("s", $email);
         $stmt->execute();

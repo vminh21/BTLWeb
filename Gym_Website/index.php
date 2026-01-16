@@ -5,7 +5,7 @@ session_start();
 //     header("Location: Form_Login_Logout/Login.php");
 //     exit(); 
 // }
-$chat_greeting = "Chào bạn"; // Mặc định
+$chat_greeting = "Chào bạn";
     if (isset($_SESSION['full_name'])) {
         $chat_greeting = "Chào " . htmlspecialchars($_SESSION['full_name']);
     }
@@ -70,7 +70,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
                     <h2>ISS FOR EVERY SUCCESS</h2>
                     <p>Bắt đầu bằng việc lấy cảm hứng, tiếp tục để truyền cảm hứng.</p>
                     <div class="header__btn">
-                        <button class="btn btn__primary" id="btn-login">GET STARTED</button>
+                        <button class="btn btn__primary" id="btn-login" data-logged-in="<?php echo isset($_SESSION['member_id']) ? 'true' : 'false'; ?>">GET STARTED</button>
                     </div>
                 </div>
             </div>
@@ -148,11 +148,11 @@ $chat_greeting = "Chào bạn"; // Mặc định
             <h2 class="section__header">MEET OUR TRAINERS</h2>
             <div class="trainer__grid">
                 <div class="trainer__card">
-                    <img src="assets/trainer-1.jpg" alt="trainer" />
-                    <h4>DAVID WILLIAMS</h4>
+                    <img src="assets/pthiepcuta.jpg" alt="trainer" />
+                    <h4>Hiệp Cử Tạ</h4>
                     <p>HLV Thể Hình</p>
                     <div class="trainer__socials">
-                      <a href="#"><i class="ri-facebook-fill"></i></a>
+                      <a href="https://www.facebook.com/hoang.hiep.853060"><i class="ri-facebook-fill"></i></a>
                       <a href="#"><i class="ri-twitter-fill"></i></a>
                       <a href="#"><i class="ri-youtube-fill"></i></a>
                     </div>
@@ -207,7 +207,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
                 </ul>
                 <h3><sup>$</sup>500000<span>/THÁNG</span></h3>
                 
-                <a href="Form_Login_Logout/checkout.php?package_id=1" class="btn btn__primary">BUY NOW</a>
+                <a href="QL_Profile/member_profile.php" class="btn btn__primary">BUY NOW</a>
             </div>
 
             <div class="membership__card">
@@ -222,7 +222,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
                 </ul>
                 <h3><sup>$</sup>1350000<span>/3 THÁNG</span></h3>
                 
-                <a href="Form_Login_Logout/checkout.php?package_id=2" class="btn btn__primary">BUY NOW</a>
+                <a href="QL_Profile/member_profile.php" class="btn btn__primary">BUY NOW</a>
             </div>
 
             <div class="membership__card">
@@ -237,7 +237,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
                 </ul>
                 <h3><sup>$</sup>5000000<span>/NĂM</span></h3>
                 
-                <a href="Form_Login_Logout/checkout.php?package_id=3" class="btn btn__primary">BUY NOW</a>
+                <a href="QL_Profile/member_profile.php" class="btn btn__primary">BUY NOW</a>
             </div>
 
         </div>
@@ -287,25 +287,25 @@ $chat_greeting = "Chào bạn"; // Mặc định
   <div class="section__container blog__container">
     <h2 class="section__header">LATEST BLOGS</h2> <div class="blog__grid">
 
-      <a href="Hiep_Folder/blog-detail.php?id=1" class="blog__card">
+      <a href="Hiep_Folder/blog-detail.php?id=b1" class="blog__card">
         <img src="assets/blog-1.jpg" alt="blog" />
         <h4>Dinh dưỡng tối ưu cho hiệu suất tập luyện</h4>
         <p>Bí quyết nạp năng lượng đúng cách trước và sau khi tập.</p>
       </a>
 
-      <a href="Hiep_Folder/blog-detail.php?id=2" class="blog__card">
+      <a href="Hiep_Folder/blog-detail.php?id=b2" class="blog__card">
         <img src="assets/blog-2.jpg" alt="blog" />
         <h4>Hướng dẫn đặt mục tiêu Fitness thông minh</h4>
         <p>Cách áp dụng nguyên tắc SMART để đạt được vóc dáng mơ ước.</p>
       </a>
 
-      <a href="Hiep_Folder/blog-detail.php?id=3" class="blog__card">
+      <a href="Hiep_Folder/blog-detail.php?id=b3" class="blog__card">
         <img src="assets/blog-3.jpg" alt="blog" />
         <h4>Kỹ thuật tập luyện hiệu quả cho người bận rộn</h4>
         <p>Tối ưu hóa thời gian với các phương pháp tập cường độ cao.</p>
       </a>
 
-      <a href="Hiep_Folder/blog-detail.php?id=4" class="blog__card">
+      <a href="Hiep_Folder/blog-detail.php?id=b4" class="blog__card">
         <img src="assets/blog-4.jpg" alt="blog" />
         <h4>Cẩm nang chạy bộ cho người mới bắt đầu</h4>
         <p>Những lưu ý quan trọng để bắt đầu hành trình chạy bộ an toàn.</p>
@@ -314,28 +314,50 @@ $chat_greeting = "Chào bạn"; // Mặc định
     </div>
 
     <div class="blog__btn">
-      <a href="Hiep_Folder/viewall.php" class="btn btn__primary">VIEW ALL</a>
+      <a href="Hiep_Folder/thongbao.php" class="btn btn__primary">THÔNG BÁO</a>
     </div>
 
   </div>
 </section>
 
-        <section class="section__container bmi__container">
+        <section class="bmi__section">
+    <div class="bmi__container">
+        <div class="bmi__left">
+            <img src="assets/bmi.png" alt="BMI Illustration">
+        </div>
+
+        <div class="bmi__right">
+            <h2 class="bmi__title">TÍNH BMI</h2>
+            <p class="bmi__subtitle">Nhập thông số để kiểm tra sức khỏe của bạn.</p>
             
-            <div class="wrapper">
-            <h2 class="bmi__header">BMI CALCULATOR</h2>
-            <p>Chiều cao (CM):
-                <input type="text" id="height"><br><span id="height_error"></span>
-            </p>
-    
-            <p>Cân nặng (KG):
-                <input type="text" id="weight"><br><span id="weight_error"></span>
-            </p>
-    
-            <button class="btn" id="btn">CALCULATE</button>
-            <p id="output"></p>
-          </div>
-        </section>
+            <div class="bmi__form-grid">
+                <div>
+                    <input type="number" id="height" placeholder="Chiều cao / cm">
+                    <small id="height_error" style="color: #dc030a; display: block; margin-top: 5px;"></small>
+                </div>
+                <div>
+                    <input type="number" id="weight" placeholder="Cân nặng / kg">
+                    <small id="weight_error" style="color: #dc030a; display: block; margin-top: 5px;"></small>
+                </div>
+                <input type="number" placeholder="Tuổi">
+                
+                <select id="gender" class="bmi__select">
+                    <option value="" disabled selected>Giới tính</option>
+                    <option value="male">Nam</option>
+                    <option value="female">Nữ</option>
+                </select>
+                
+
+                
+                <div class="bmi__action">
+                    <button class="bmi__submit-btn" id="btn">NHẬN KẾT QUẢ</button>
+                    <button class="bmi__reset-btn" id="reset_btn">LÀM MỚI</button>
+                    <div id="output" class="bmi__result-text">/ Kết quả: <span>Chưa có dữ liệu</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
         <footer class="footer" id="contact">
           <div class="section__container footer__container">
@@ -348,7 +370,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
               </p>
               <ul class="footer__links">
                 <li>
-                  <a href="#">
+                  <a href="https://www.google.com/maps/place/243+Nguy%E1%BB%85n+Xi%E1%BB%83n,+T%C3%A2n+Tri%E1%BB%81u,+Thanh+Xu%C3%A2n,+H%C3%A0+N%E1%BB%99i,+Vi%E1%BB%87t+Nam/@20.9865181,105.8038444,18.25z/data=!4m6!3m5!1s0x3135acea531bf101:0x2bf0083a71de4586!8m2!3d20.9847163!4d105.8086446!16s%2Fg%2F11h56c6ts9?entry=ttu&g_ep=EgoyMDI2MDExMy4wIKXMDSoASAFQAw%3D%3D">
                     <span><i class="ri-map-pin-2-fill"></i></span>
                     243 Đường Nguyễn Xiển<br />Thanh Xuân, Hà Nội
                   </a>
@@ -386,12 +408,6 @@ $chat_greeting = "Chào bạn"; // Mặc định
               <p>
                 Đừng bỏ lỡ những tin tức và ưu đãi mới nhất - đăng ký ngay hôm nay và tham gia cộng đồng thể hình thịnh vượng của chúng tôi!
               </p>
-              <form onsubmit="sendEmail(); reset(); return false;">
-                <input type="text" id="name" placeholder="Nhập tên" />
-                <input type="text" id="email" placeholder="Nhập Email" />
-                <input type="text" id="phone" placeholder="Nhập SĐT" />
-                <button type="submit" class="btn btn__primary">SEND</button>
-              </form>
               <div class="footer__socials">
                 <a href="#"><i class="ri-facebook-fill"></i></a>
                 <a href="#"><i class="ri-twitter-fill"></i></a>
@@ -425,7 +441,7 @@ $chat_greeting = "Chào bạn"; // Mặc định
         <div class="chat-options" id="chatOptions">
             <button onclick="selectOption('Tư vấn')">Tư vấn sức khỏe</button>
             <button onclick="selectOption('Gói tập')">Thông tin gói tập</button>
-            <button onclick="selectOption('Gặp Admin')">Chat với người thật</button>
+            <button onclick="selectOption('Gặp nhân viên')">Chat với nhân viên</button>
         </div>
     </div>
     

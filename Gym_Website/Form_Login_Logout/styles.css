@@ -53,7 +53,7 @@ body {
   border-radius: 40px;
   font-size: 16px;
   color: #2e2e2e;
-  padding: 20px 45px 20px 20px; /* Adjust padding to make space for the eye icon */
+  padding: 20px 45px 20px 20px;
 }
 
 .input-box input::placeholder {
@@ -62,11 +62,11 @@ body {
 
 .input-box i {
   position: absolute;
-  right: 20px; /* Adjust position as needed */
+  right: 20px;
   top: 30%;
   transform: translate(-50%);
   font-size: 20px;
-  cursor: pointer; /* Indicate that the icon is clickable */
+  cursor: pointer;
 }
 .remember-forgot {
   display: flex;
@@ -81,22 +81,22 @@ body {
 }
 
 .remember-forgot a {
-  color: #050505; /* Original link color */
+  color: #050505;
   text-decoration: none;
 }
 
 .remember-forgot a:hover {
-  text-decoration: underline; /* Hover effect */
-  color: #000000; /* Change color on hover if desired */
+  text-decoration: underline;
+  color: #000000;
 }
 
-/* Styles for showing and hiding passwords */
+
 .input-box i.bx-show {
-  color: #007bff; /* Color when the password is visible */
+  color: #007bff;
 }
 
 .input-box i.bx-hide {
-  color: #7c7a7a; /* Default color when the password is hidden */
+  color: #7c7a7a;
 }
 
 .wrapper .btn {
@@ -166,3 +166,19 @@ body {
     }
     .input-box select:focus { background: #fff; }
     .input-box select:invalid { color: gray; }
+/* kiểm tra radio */
+    .radio-group {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px; /* Khoảng cách giữa các lựa chọn */
+    align-items: center;
+}
+
+.radio-group input {
+    cursor: pointer;
+}
+
+.radio-group label {
+    cursor: pointer;
+    margin-right: 10px;
+}

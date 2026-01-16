@@ -1,32 +1,5 @@
 <?php
-// 1. KẾT NỐI DATABASE
 include("../QL_Profile/connectdb.php"); 
-
-// 2. MẢNG BLOG MẪU (Giữ nguyên theo yêu cầu)
-$blogs = [
-    1 => [
-        "title" => "Fueling Your Body for Optimal Performance",
-        "image" => "../assets/blog-1.jpg",
-        "desc" => "Bài viết về dinh dưỡng giúp tối ưu hiệu suất tập luyện..."
-    ],
-    2 => [
-        "title" => "A Guide to Setting and Achieving Fitness Goals",
-        "image" => "../assets/blog-2.jpg",
-        "desc" => "Hướng dẫn đặt mục tiêu và đạt được mục tiêu thể hình..."
-    ],
-    3 => [
-        "title" => "Tips and Techniques for Efficient Exercise",
-        "image" => "../assets/blog-3.jpg",
-        "desc" => "Mẹo và kỹ thuật tập luyện hiệu quả hơn..."
-    ],
-    4 => [
-        "title" => "A Beginner's Guide to Starting Your Running Journey",
-        "image" => "../assets/blog-4.jpg",
-        "desc" => "Hướng dẫn cho người mới bắt đầu chạy bộ..."
-    ],
-];
-
-// 3. TRUY VẤN DỮ LIỆU TỪ DATABASE (Thông báo Admin)
 $sql = "SELECT * FROM notifications ORDER BY created_at DESC";
 $result = mysqli_query($conn, $sql);
 ?>
@@ -39,7 +12,6 @@ $result = mysqli_query($conn, $sql);
     <title>Tất cả bài viết & Thông báo</title>
     <link rel="stylesheet" href="style.css"> 
     <style>
-        /* RESET & CƠ BẢN */
         body { 
             padding: 40px; 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -47,7 +19,7 @@ $result = mysqli_query($conn, $sql);
             color: #333;
         }
 
-        .viewall__container { 
+        .thongbao__container { 
             max-width: 1200px; 
             margin: auto; 
         }
@@ -77,18 +49,18 @@ $result = mysqli_query($conn, $sql);
             border-radius: 2px;
         }
 
-        /* GRID HỆ THỐNG - ĐẢM BẢO ĐỒNG NHẤT FORMAT */
+        
         .blog__grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 2.5rem;
-            align-items: stretch; /* Ép các card cùng hàng cao bằng nhau */
+            align-items: stretch; 
         }
 
-        /* FORMAT CARD */
+        
         .blog__card {
             display: flex;
-            flex-direction: column; /* Sắp xếp nội dung dọc để dùng flex-grow */
+            flex-direction: column; 
             background: white;
             border-radius: 12px;
             text-decoration: none;
@@ -105,11 +77,11 @@ $result = mysqli_query($conn, $sql);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        /* FIX ẢNH ĐỒNG NHẤT */
+        
         .blog__card img { 
             width: 100%; 
-            height: 220px; /* Chiều cao cố định cho tất cả ảnh */
-            object-fit: cover; /* Cắt ảnh vừa khung, không làm móp ảnh */
+            height: 220px; 
+            object-fit: cover; 
             border-bottom: 1px solid #f0f0f0;
         }
 
@@ -117,7 +89,7 @@ $result = mysqli_query($conn, $sql);
             padding: 20px;
             display: flex;
             flex-direction: column;
-            flex-grow: 1; /* Giúp phần text tự giãn ra để đáy các card bằng nhau */
+            flex-grow: 1; 
         }
 
         .blog__card h4 { 
@@ -125,7 +97,6 @@ $result = mysqli_query($conn, $sql);
             color: #1e1e2d; 
             margin-bottom: 12px;
             line-height: 1.4;
-            /* Giới hạn 2 dòng tiêu đề */
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -137,8 +108,7 @@ $result = mysqli_query($conn, $sql);
             font-size: 0.95rem; 
             color: #6c757d; 
             line-height: 1.6;
-            flex-grow: 1; /* Đẩy nội dung xuống */
-            /* Giới hạn 3 dòng mô tả */
+            flex-grow: 1; 
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -146,7 +116,7 @@ $result = mysqli_query($conn, $sql);
             margin-bottom: 15px;
         }
 
-        /* BADGE CHO THÔNG BÁO TỪ DATABASE */
+        
         .badge-notify {
             background: #ff6b6b;
             color: white;
@@ -178,13 +148,13 @@ $result = mysqli_query($conn, $sql);
 </head>
 <body>
 
-<div class="viewall__container">
+<div class="thongbao__container">
     <a href="../index.php#blog" class="back-home">
         <i class='bx bx-left-arrow-alt'></i> ← Quay lại Trang chủ
     </a>
     
     <div class="header__title">
-        <h2>BÀI VIẾT & THÔNG BÁO</h2>
+        <h2>THÔNG BÁO</h2>
     </div>
 
     <div class="blog__grid">
@@ -212,17 +182,7 @@ $result = mysqli_query($conn, $sql);
             <?php endwhile; ?>
         <?php endif; ?>
 
-        <?php foreach ($blogs as $id => $blog): ?>
-            <a href="blog-detail.php?id=sample_<?php echo $id; ?>" class="blog__card">
-                <img src="<?php echo $blog['image']; ?>" alt="blog" />
-                <div class="blog__info">
-                    <span class="badge-notify" style="background: #6c757d;">Tin tức</span>
-                    <h4><?php echo htmlspecialchars($blog['title']); ?></h4>
-                    <p><?php echo htmlspecialchars($blog['desc']); ?></p>
-                    <small style="color: #adb5bd;">Bài viết mẫu</small>
-                </div>
-            </a>
-        <?php endforeach; ?>
+        
     </div>
 </div>
 
