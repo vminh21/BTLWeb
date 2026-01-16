@@ -1,5 +1,6 @@
+/* File: process_payment.css */
 :root {
-    --primary: #d92027;       /* Đỏ Gym Master */
+    --primary: #d92027;       /* Màu đỏ chủ đạo */
     --primary-dark: #b01217;
     --bg-body: #f0f2f5;
     --text-dark: #1f2937;
@@ -28,25 +29,57 @@ body {
     position: relative;
 }
 
-/* Header */
+/* --- HEADER --- */
 .header {
     background: var(--primary);
     padding: 25px;
     text-align: center;
     color: var(--white);
 }
-.header-icon { font-size: 2rem; margin-bottom: 5px; }
-.header h2 { margin: 0; font-size: 1.25rem; font-weight: 700; }
-.header p { margin: 5px 0 0; font-size: 0.9rem; opacity: 0.9; }
 
-/* Body */
-.body { padding: 30px; text-align: center; }
+.header-icon {
+    font-size: 2rem;
+    margin-bottom: 5px;
+}
 
-.amount-box { margin-bottom: 25px; }
-.amount-box .label { font-size: 0.8rem; text-transform: uppercase; color: var(--text-gray); font-weight: 600; letter-spacing: 0.5px; }
-.amount-box .amount { font-size: 2rem; color: var(--primary); font-weight: 800; margin-top: 5px; }
+.header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
 
-/* QR Wrapper */
+.header p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* --- BODY --- */
+.body {
+    padding: 30px;
+    text-align: center;
+}
+
+.amount-box {
+    margin-bottom: 25px;
+}
+
+.amount-box .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-gray);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.amount-box .amount {
+    font-size: 2rem;
+    color: var(--primary);
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+/* --- QR WRAPPER --- */
 .qr-wrapper {
     background: #fff;
     padding: 15px;
@@ -55,9 +88,15 @@ body {
     display: inline-block;
     margin-bottom: 25px;
 }
-.qr-img { width: 100%; max-width: 220px; display: block; border-radius: 8px; }
 
-/* Info List */
+.qr-img {
+    width: 100%;
+    max-width: 220px;
+    display: block;
+    border-radius: 8px;
+}
+
+/* --- INFO LIST --- */
 .info-list {
     text-align: left;
     background: #f9fafb;
@@ -66,13 +105,21 @@ body {
     margin-bottom: 25px;
     border: 1px solid #f3f4f6;
 }
-.info-item { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
 .info-item:last-child { margin-bottom: 0; }
+
 .info-label { color: var(--text-gray); font-weight: 500; }
 .info-value { font-weight: 700; color: var(--text-dark); }
 .info-value.highlight { color: var(--primary); }
 
-/* Buttons */
+/* --- BUTTONS --- */
 .btn-confirm {
     background: var(--primary);
     color: white;
@@ -84,9 +131,17 @@ body {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
-.btn-confirm:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+.btn-confirm:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(217, 32, 39, 0.3);
+}
 
 .btn-back {
     background: transparent;
@@ -95,7 +150,11 @@ body {
     margin-top: 15px;
     font-size: 0.9rem;
     cursor: pointer;
-    display: flex; align-items: center; justify-content: center; gap: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
     width: 100%;
 }
+
 .btn-back:hover { color: var(--text-dark); text-decoration: underline; }

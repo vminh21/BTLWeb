@@ -6,16 +6,16 @@ session_start();
 require_once 'connectdb.php';
 
 /* ================== KIỂM TRA ĐĂNG NHẬP ================== */
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'member') {
+if (!isset($_SESSION['member_id']) || $_SESSION['role'] !== 'member') {
     header("Location: ../Login/login.php");
     exit();
 }
 
-$member_id = $_SESSION['user_id'];
+$member_id = $_SESSION['member_id'];
 $success = "";
 $error = "";
 
-/* 1. LẤY THÔNG TIN HỘI VIÊN (Sửa SELECT * để lấy cả address, gender) */
+/* 1. LẤY THÔNG TIN HỘI VIÊN */
 $sql = "SELECT * FROM members WHERE member_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $member_id);
@@ -43,44 +43,42 @@ if ($active_sub) {
     }
 }
 
-/* 3. XỬ LÝ CẬP NHẬT HỒ SƠ (Đã thêm Address và Gender) */
+/* 3. XỬ LÝ CẬP NHẬT HỒ SƠ */
 if (isset($_POST['update_profile'])) {
     $name  = trim($_POST['full_name']);
     $email = trim($_POST['email']);
-    $address = trim($_POST['address']); // Mới
-    $gender = $_POST['gender'];         // Mới
+    $address = trim($_POST['address']); 
+    $gender = $_POST['gender'];         
     $password = trim($_POST['password']);
-    $confirm_password = trim($_POST['confirm_password']);
-
-    // Kiểm tra mật khẩu
+    
+    // Logic update
     if ($password !== "") {
-        if ($password !== $confirm_password) {
-            $error = "Mật khẩu xác nhận không khớp!";
-        } else {
-            // Cập nhật CÓ đổi mật khẩu (Thêm address, gender)
-            $sql = "UPDATE members SET full_name = ?, email = ?, address = ?, gender = ?, password = ? WHERE member_id = ?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sssssi", $name, $email, $address, $gender, $password, $member_id);
-            
-            if ($stmt->execute()) {
-                $success = "Đổi mật khẩu & cập nhật thành công!";
-                // Cập nhật lại biến hiển thị ngay lập tức
-                $member['full_name'] = $name; $member['email'] = $email;
-                $member['address'] = $address; $member['gender'] = $gender;
-            } else { $error = "Lỗi: " . $conn->error; }
-        }
+        $sql = "UPDATE members SET full_name = ?, email = ?, address = ?, gender = ?, password = ? WHERE member_id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssssi", $name, $email, $address, $gender, $password, $member_id);
     } else {
-        // Cập nhật KHÔNG đổi mật khẩu (Thêm address, gender)
         $sql = "UPDATE members SET full_name = ?, email = ?, address = ?, gender = ? WHERE member_id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("ssssi", $name, $email, $address, $gender, $member_id);
-        
-        if ($stmt->execute()) {
-            $success = "Cập nhật thông tin thành công!";
-            $member['full_name'] = $name; $member['email'] = $email;
-            $member['address'] = $address; $member['gender'] = $gender;
-        } else { $error = "Lỗi: " . $conn->error; }
     }
+    
+    if ($stmt->execute()) {
+        // --- ĐOẠN SỬA QUAN TRỌNG ---
+        // 1. Lưu thông báo vào Session
+        $_SESSION['flash_message'] = "Cập nhật thông tin thành công!";
+        
+        // 2. Load lại trang ngay lập tức (Để xóa dữ liệu POST)
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    } else { 
+        $error = "Lỗi: " . $conn->error; 
+    }
+}
+
+// --- KIỂM TRA ĐỂ HIỆN THÔNG BÁO (Sau khi reload) ---
+if (isset($_SESSION['flash_message'])) {
+    $success = $_SESSION['flash_message']; // Lấy thông báo ra biến $success
+    unset($_SESSION['flash_message']);     // Xóa ngay để F5 lần sau không hiện nữa
 }
 
 /* 4. LẤY DỮ LIỆU GÓI & LỊCH SỬ */
@@ -103,7 +101,7 @@ $transactions = $stmt_trans->get_result();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* SỬA LỖI INPUT & ICON */
+        /* CSS INPUT & ICON */
         .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
         .input-wrapper input, .input-wrapper select { width: 100%; position: relative; z-index: 1; padding-left: 45px; padding-right: 50px; }
         .input-wrapper > i:not(.eye-icon) { position: absolute; left: 15px; color: #666; z-index: 2; pointer-events: none; }
@@ -114,22 +112,28 @@ $transactions = $stmt_trans->get_result();
         .days-left { font-size: 0.8rem; color: #e0e0e0; margin-top: 2px; }
         .days-left b { color: #ffeb3b; }
 
-        /* --- CSS GÓI ĐANG SỬ DỤNG --- */
-        .membership__card.current-pack {
-            border: 2px solid #00c851 !important; 
-            background: rgba(0, 200, 81, 0.05);
-            box-shadow: 0 0 15px rgba(0, 200, 81, 0.2);
-        }
-        .tag-active {
-            position: absolute; top: 0; right: 0;
-            background: #00c851; color: white;
-            font-size: 0.7rem; font-weight: bold;
-            padding: 4px 10px; border-bottom-left-radius: 8px;
-        }
-        .btn-card.active-btn {
-            background: #00c851; border-color: #00c851; color: white; cursor: default;
-        }
+        /* CSS GÓI TẬP */
+        .membership__card.current-pack { border: 2px solid #00c851 !important; background: rgba(0, 200, 81, 0.05); box-shadow: 0 0 15px rgba(0, 200, 81, 0.2); }
+        .tag-active { position: absolute; top: 0; right: 0; background: #00c851; color: white; font-size: 0.7rem; font-weight: bold; padding: 4px 10px; border-bottom-left-radius: 8px; }
+        .btn-card.active-btn { background: #00c851; border-color: #00c851; color: white; cursor: default; }
         .btn-card.active-btn:hover { background: #00c851; transform: none; box-shadow: none; }
+
+        /* CSS BÁO LỖI (Mới) */
+        .error-msg {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 5px;
+            display: none; /* Mặc định ẩn, chỉ hiện khi lỗi */
+            min-height: 20px;
+        }
+        .text-danger { color: #d92027; }
+        
+        /* CSS NÚT DISABLED */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #ccc !important;
+        }
     </style>
 </head>
 <body>
@@ -174,28 +178,33 @@ $transactions = $stmt_trans->get_result();
             <div class="tab-content">
                 <div id="profile" class="section active">
                     <h3 class="section-title">Chỉnh sửa thông tin</h3>
-                    <form method="post" class="modern-form" onsubmit="return validatePassword()">
+                    <form method="post" class="modern-form" id="updateForm">
+                        
                         <div class="form-group">
                             <label>Họ và tên</label>
                             <div class="input-wrapper">
                                 <i class="ri-user-smile-line"></i>
-                                <input type="text" name="full_name" value="<?= htmlspecialchars($member['full_name']) ?>" required>
+                                <input type="text" name="full_name" id="fullName" value="<?= htmlspecialchars($member['full_name']) ?>" onkeyup="validateForm()" required>
                             </div>
+                            <small id="errName" class="error-msg"></small>
                         </div>
+
                         <div class="form-group">
                             <label>Email</label>
                             <div class="input-wrapper">
                                 <i class="ri-mail-line"></i>
-                                <input type="email" name="email" value="<?= htmlspecialchars($member['email']) ?>" required>
+                                <input type="email" name="email" id="email" value="<?= htmlspecialchars($member['email']) ?>" onkeyup="validateForm()" required>
                             </div>
+                            <small id="errEmail" class="error-msg"></small>
                         </div>
                         
                         <div class="form-group">
                             <label>Địa chỉ</label>
                             <div class="input-wrapper">
                                 <i class="ri-map-pin-line"></i>
-                                <input type="text" name="address" value="<?= htmlspecialchars($member['address'] ?? '') ?>" placeholder="Nhập địa chỉ của bạn...">
+                                <input type="text" name="address" id="address" value="<?= htmlspecialchars($member['address'] ?? '') ?>" onkeyup="validateForm()" placeholder="Nhập địa chỉ của bạn...">
                             </div>
+                            <small id="errAddress" class="error-msg"></small>
                         </div>
 
                         <div class="form-group">
@@ -214,19 +223,25 @@ $transactions = $stmt_trans->get_result();
                             <label>Mật khẩu mới</label>
                             <div class="input-wrapper">
                                 <i class="ri-lock-password-line"></i>
-                                <input type="password" name="password" id="newPass" placeholder="••••••••">
+                                <input type="password" name="password" id="newPass" onkeyup="validateForm()" placeholder="••••••••">
                                 <i class="ri-eye-off-line eye-icon" onclick="togglePass('newPass', this)"></i>
                             </div>
+                            <small id="errNewPass" class="error-msg"></small>
                         </div>
+
                         <div class="form-group">
                             <label>Xác nhận mật khẩu</label>
                             <div class="input-wrapper">
                                 <i class="ri-key-2-line"></i>
-                                <input type="password" name="confirm_password" id="confirmPass" placeholder="Nhập lại mật khẩu">
+                                <input type="password" name="confirm_password" id="confirmPass" onkeyup="validateForm()" placeholder="Nhập lại mật khẩu">
                                 <i class="ri-eye-off-line eye-icon" onclick="togglePass('confirmPass', this)"></i>
                             </div>
+                            <small id="errConfirmPass" class="error-msg"></small>
                         </div>
-                        <button class="btn-submit" name="update_profile">Lưu thay đổi <i class="ri-save-line"></i></button>
+
+                        <button class="btn-submit" name="update_profile" id="btnSubmit">
+                            Lưu thay đổi <i class="ri-save-line"></i>
+                        </button>
                     </form>
                 </div>
 
@@ -240,11 +255,8 @@ $transactions = $stmt_trans->get_result();
                         $packages->data_seek(0);
                         while($p = $packages->fetch_assoc()): 
                             $isCurrent = ($active_sub && $active_sub['package_id'] == $p['package_id']);
-                            // Chỉ hiện HOT nếu chưa có gói nào active
                             $isPopular = ($p['package_id'] == 2 && !$active_sub) ? 'popular' : '';
-                            
-                            if ($isCurrent) { $cardClass = 'current-pack'; } 
-                            else { $cardClass = $isPopular; }
+                            $cardClass = $isCurrent ? 'current-pack' : $isPopular;
                         ?>
                         <div class="membership__card <?= $cardClass ?>">
                             <?php if($isCurrent): ?>
@@ -292,7 +304,7 @@ $transactions = $stmt_trans->get_result();
                                 <select name="payment_method">
                                     <option value="Tiền mặt">Tiền mặt tại quầy</option>
                                     <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
-                                    <option value="Momo">Ví Momo / ZaloPay</option>
+                                    <option value="Momo">Thanh toán bằng Momo</option>
                                 </select>
                             </div>
                         </div>
@@ -325,12 +337,24 @@ $transactions = $stmt_trans->get_result();
         </div>
     </main>
 </div>
+
 <script>
+    /* =========================================
+       1. CÁC HÀM TIỆN ÍCH (TAB, GÓI, PASS)
+       ========================================= */
     function showTab(event, id) {
+        // --- Code cũ (Giữ nguyên) ---
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         event.currentTarget.classList.add('active');
+
+        // --- CODE MỚI THÊM VÀO ĐÂY ---
+        // Tìm tất cả các thông báo (.alert) và ẩn đi
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.display = 'none';
+        });
     }
     
     function selectPackage(id) {
@@ -340,14 +364,107 @@ $transactions = $stmt_trans->get_result();
 
     function togglePass(inputId, icon) {
         const input = document.getElementById(inputId);
-        if (input.type === "password") { input.type = "text"; icon.classList.replace('ri-eye-off-line', 'ri-eye-line'); }
-        else { input.type = "password"; icon.classList.replace('ri-eye-line', 'ri-eye-off-line'); }
+        if (input.type === "password") { 
+            input.type = "text"; 
+            icon.classList.replace('ri-eye-off-line', 'ri-eye-line'); 
+        } else { 
+            input.type = "password"; 
+            icon.classList.replace('ri-eye-line', 'ri-eye-off-line'); 
+        }
     }
-    function validatePassword() {
-        if (document.getElementById('newPass').value !== "" && document.getElementById('newPass').value !== document.getElementById('confirmPass').value) {
-            alert("❌ Mật khẩu xác nhận không khớp!"); return false;
-        } return true;
+
+    /* =========================================
+       2. VALIDATE FORM (CHỈ HIỆN LỖI)
+       ========================================= */
+
+    // Hàm hiển thị lỗi (Chỉ hiện màu đỏ)
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = `<i class="ri-error-warning-fill"></i> ${message}`;
+        el.className = "error-msg text-danger"; 
+        el.style.display = "block";
     }
+
+    // Hàm xóa lỗi (Ẩn đi)
+    function clearError(elementId) {
+        const el = document.getElementById(elementId);
+        el.innerHTML = "";
+        el.style.display = "none";
+    }
+
+    // --- HÀM VALIDATE CHÍNH ---
+    function validateForm() {
+        let name = document.getElementById('fullName').value.trim();
+        let email = document.getElementById('email').value.trim();
+        let address = document.getElementById('address').value.trim();
+        let pass = document.getElementById('newPass').value;
+        let confirm = document.getElementById('confirmPass').value;
+
+        let isValid = true; 
+
+        // 1. CHECK TÊN
+        if (name.length < 5) {
+            showError("errName", "Tên quá ngắn (tối thiểu 5 ký tự)");
+            isValid = false;
+        } else { clearError("errName"); }
+
+        // 2. CHECK EMAIL
+        const emailRegex = /^[^\s@]+@[^\s@]+\.com$/; 
+        
+        if (!emailRegex.test(email)) {
+            showError("errEmail", "Email phải có đuôi .com (ví dụ: @gmail.com)");
+            isValid = false;
+        } else { 
+            clearError("errEmail");}
+
+        // 3. CHECK ĐỊA CHỈ
+        if (address.length === 0) {
+            showError("errAddress", "Vui lòng nhập địa chỉ");
+            isValid = false;
+        } else { clearError("errAddress"); }
+
+        // 4. CHECK MẬT KHẨU
+        if (pass.length > 0) {
+            const strongPass = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+            
+            if (!strongPass.test(pass)) {
+                showError("errNewPass", "Mật khẩu yếu: Cần 8 ký tự, gồm cả chữ và số");
+                isValid = false;
+            } else { clearError("errNewPass"); }
+
+            if (pass !== confirm) {
+                showError("errConfirmPass", "Mật khẩu xác nhận không khớp");
+                isValid = false;
+            } else { clearError("errConfirmPass"); }
+        } else {
+            clearError("errNewPass");
+            clearError("errConfirmPass");
+        }
+
+        // ĐIỀU KHIỂN NÚT SUBMIT
+        const btn = document.getElementById('btnSubmit');
+        if (isValid) {
+            btn.disabled = false;
+            btn.style.opacity = "1";
+            btn.style.cursor = "pointer";
+        } else {
+            btn.disabled = true;
+            btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
+        }
+        function selectPackage(idGoiTap) {
+        // Gán giá trị vào thẻ select
+        document.getElementById('packageSelect').value = idGoiTap;
+        
+        // Cuộn màn hình xuống form
+        document.getElementById('register-form').scrollIntoView({ behavior: 'smooth' });
+    }
+    }
+
+    // Chạy khi load trang
+    window.onload = function() {
+        validateForm();
+    };
 </script>
 </body>
 </html>
