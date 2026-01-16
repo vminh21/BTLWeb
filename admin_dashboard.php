@@ -1,22 +1,18 @@
 <?php
 session_start();
 
-// 1. KIỂM TRA BẢO MẬT
 if (!isset($_SESSION['admin_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.php");
     exit();
 }
 
-// 2. KẾT NỐI DATABASE
 $conn = new mysqli("localhost", "root", "", "GymManagement");
 if ($conn->connect_error) { die("Lỗi kết nối: " . $conn->connect_error); }
 $conn->set_charset("utf8mb4");
 
-// --- 3. XỬ LÝ TÌM KIẾM ---
 $search_name = isset($_GET['search_name']) ? $conn->real_escape_string($_GET['search_name']) : '';
 $search_type = isset($_GET['search_type']) ? $conn->real_escape_string($_GET['search_type']) : '';
 
-// Xây dựng điều kiện WHERE động
 $where_clauses = ["1=1"];
 if (!empty($search_name)) {
     $where_clauses[] = "m.full_name LIKE '%$search_name%'";
@@ -26,13 +22,11 @@ if (!empty($search_type)) {
 }
 $where_sql = implode(" AND ", $where_clauses);
 
-// 4. LẤY DỮ LIỆU THỐNG KÊ (Tính toán dựa trên bộ lọc nếu muốn, ở đây tôi giữ nguyên tổng quan)
 $total_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM transactions")->fetch_row()[0] ?? 0;
 $active_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date >= CURDATE()")->fetch_row()[0] ?? 0;
 $expired_members = $conn->query("SELECT COUNT(DISTINCT member_id) FROM member_subscriptions WHERE end_date < CURDATE()")->fetch_row()[0] ?? 0;
 $total_revenue = $conn->query("SELECT SUM(amount) FROM transactions")->fetch_row()[0] ?? 0;
 
-// 5. TRUY VẤN DANH SÁCH GIAO DỊCH (Có áp dụng bộ lọc)
 $sql_recent = "SELECT t.*, m.full_name, 
               (SELECT MAX(ms.end_date) FROM member_subscriptions ms WHERE ms.member_id = t.member_id) AS end_date 
               FROM transactions t 
@@ -49,7 +43,7 @@ $recent_transactions = $conn->query($sql_recent);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - FitPhysique</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="admin_dashboard.css?v=1.1">
+    <link rel="stylesheet" href="admin_dashboard.css?v=1.2">
 </head>
 <body>
 
@@ -82,36 +76,31 @@ $recent_transactions = $conn->query($sql_recent);
         </div>
 
         <div class="search-bar-container">
-    <form method="GET" action="admin_dashboard.php">
-        <div class="search-group">
-            <i class='bx bx-search'></i>
-            <input type="text" name="search_name" placeholder="Nhập tên hội viên cần tìm..." value="<?= htmlspecialchars($search_name) ?>">
-        </div>
-        
-        <div class="filter-group">
-            <select name="search_type">
-                <option value="">-- Loại giao dịch --</option>
-                <option value="Registration" <?= $search_type == 'Registration' ? 'selected' : '' ?>>Đăng ký mới</option>
-                <option value="Renewal" <?= $search_type == 'Renewal' ? 'selected' : '' ?>>Gia hạn</option>
-            </select>
-        </div>
+            <form method="GET" action="admin_dashboard.php">
+                <div class="search-group">
+                    <i class='bx bx-search'></i>
+                    <input type="text" name="search_name" placeholder="Nhập tên hội viên cần tìm..." value="<?= htmlspecialchars($search_name) ?>">
+                </div>
+                
+                <div class="filter-group">
+                    <select name="search_type">
+                        <option value="">-- Loại giao dịch --</option>
+                        <option value="Registration" <?= $search_type == 'Registration' ? 'selected' : '' ?>>Đăng ký mới</option>
+                        <option value="Renewal" <?= $search_type == 'Renewal' ? 'selected' : '' ?>>Gia hạn</option>
+                    </select>
+                </div>
 
-        <button type="submit" class="btn-submit-search">
-            <i class='bx bx-filter-alt'></i> Lọc dữ liệu
-        </button>
-
-        <?php if(!empty($search_name) || !empty($search_type)): ?>
-            <a href="admin_dashboard.php" class="btn-reset">Xóa lọc</a>
-        <?php endif; ?>
-    </form>
-</div>
+                <button type="submit" class="btn-submit-search"><i class='bx bx-filter-alt'></i> Lọc dữ liệu</button>
+                <?php if(!empty($search_name) || !empty($search_type)): ?>
+                    <a href="admin_dashboard.php" class="btn-reset">Xóa lọc</a>
+                <?php endif; ?>
+            </form>
+        </div>
 
         <div class="recent-transactions">
             <div class="table-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h2>Danh sách giao dịch</h2>
-                <button type="button" id="btnOpenModal" class="btn-add-new">
-                    <i class='bx bx-plus'></i> Thêm giao dịch
-                </button>
+                <h2>Danh sách giao dịch gần đây</h2>
+                <button type="button" id="btnOpenModal" class="btn-add-new"><i class='bx bx-plus'></i> Thêm giao dịch</button>
             </div>
             <table>
                 <thead>
@@ -148,7 +137,7 @@ $recent_transactions = $conn->query($sql_recent);
                                    data-enddate="<?= $row['end_date'] ?>">
                                    <i class='bx bxs-edit' style="color:#3498db; cursor:pointer; font-size: 1.2rem;"></i>
                                 </a>
-                                <a href="transaction_handler.php?delete_id=<?= $row['transaction_id'] ?>" onclick="return confirm('Xác nhận xóa giao dịch này?')">
+                                <a href="transaction_handler.php?delete_id=<?= $row['transaction_id'] ?>" onclick="return confirm('Xác nhận xóa giao dịch này? Hệ thống sẽ tính toán lại hạn dùng của hội viên.')">
                                     <i class='bx bxs-trash' style="color:#e74c3c; margin-left: 10px; font-size: 1.2rem;"></i>
                                 </a>
                             </td>
@@ -161,6 +150,7 @@ $recent_transactions = $conn->query($sql_recent);
             </table>
         </div>
     </div>
+
     <div id="addTransactionModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header"><h2>Thêm Giao Dịch Mới</h2><span class="close-modal">&times;</span></div>
@@ -180,26 +170,37 @@ $recent_transactions = $conn->query($sql_recent);
                     <label>Tên thành viên mới:</label>
                     <input type="text" name="new_member_name" id="newMemberName">
                 </div>
-                <div class="form-group">
-                    <label>Ngày hết hạn tập:</label>
-                    <input type="date" name="end_date" required min="<?= date('Y-m-d') ?>">
-                </div>
-                <div class="form-group">
-    <label>Gói tập & Số tiền (VNĐ):</label>
-    <select name="amount" id="amountSelect" required>   
-        <option value="">-- Chọn gói tập --</option>
-        <option value="500000" >Gói 1 tháng - 500.000đ</option>
-        <option value="1350000" >Gói 3 tháng - 1.350.000đ</option>
-        <option value="5000000" >Gói 1 năm - 5.000.000đ</option>
-    </select>
-</div>
-                <div class="form-group">
-                    <label>Loại & Phương thức:</label>
-                    <div style="display: flex; gap: 10px;">
-                        <select name="transaction_type"><option value="Registration">Đăng ký</option><option value="Renewal">Gia hạn</option></select>
-                        <select name="payment_method"><option value="Tiền mặt">Tiền mặt</option><option value="Chuyển khoản">Chuyển khoản</option></select>
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Gói tập & Số tiền:</label>
+                        <select name="amount" id="amountSelect" required style="width: 100%; padding: 8px;">
+                            <option value="">-- Chọn gói tập --</option>
+                            <option value="500000" data-months="1">Gói 1 tháng - 500.000đ</option>
+                            <option value="1350000" data-months="3">Gói 3 tháng - 1.350.000đ</option>
+                            <option value="5000000" data-months="12">Gói 1 năm - 5.000.000đ</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Ngày hết hạn dự kiến:</label>
+                        <input type="date" name="end_date" id="add_end_date" readonly style="background: #eee;">
                     </div>
                 </div>
+
+                <div class="form-group">
+                    <label>Loại giao dịch & Thanh toán:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select name="transaction_type" id="add_transaction_type" style="flex: 1;">
+                            <option value="Registration">Đăng ký mới</option>
+                            <option value="Renewal">Gia hạn</option>
+                        </select>
+                        <select name="payment_method" style="flex: 1;">
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="modal-footer">
                     <button type="button" class="close-modal">Hủy</button>
                     <button type="submit" name="btn_save" class="btn-save">Lưu Giao Dịch</button>
@@ -213,29 +214,37 @@ $recent_transactions = $conn->query($sql_recent);
             <div class="modal-header"><h2>Sửa Giao Dịch #<span id="display_edit_id"></span></h2><span class="close-modal">&times;</span></div>
             <form action="transaction_handler.php" method="POST">
                 <input type="hidden" name="transaction_id" id="edit_trans_id">
-                <input type="hidden" name="member_id" id="edit_member_id"> <div class="form-group">
-                    <label>Ngày hết hạn hiện tại:</label>
-                    <input type="date" name="end_date" id="edit_end_date" required>
+                <input type="hidden" name="member_id" id="edit_member_id"> 
+                
+                <div style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Gói tập mới:</label>
+                        <select name="amount" id="edit_amount_select" required style="width: 100%; padding: 8px;">
+                            <option value="500000" data-months="1">Gói 1 tháng - 500.000đ</option>
+                            <option value="1350000" data-months="3">Gói 3 tháng - 1.350.000đ</option>
+                            <option value="5000000" data-months="12">Gói 1 năm - 5.000.000đ</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Ngày hết hạn sau khi sửa:</label>
+                        <input type="date" name="end_date" id="edit_end_date" readonly style="background: #eee;">
+                    </div>
                 </div>
+
                 <div class="form-group">
-                    <label>Số tiền (VNĐ):</label>
-                    <input type="number" name="amount" id="edit_amount" required>
+                    <label>Loại & Phương thức:</label>
+                    <div style="display: flex; gap: 10px;">
+                        <select name="transaction_type" id="edit_type" style="flex: 1;">
+                            <option value="Registration">Đăng ký mới</option>
+                            <option value="Renewal">Gia hạn</option>
+                        </select>
+                        <select name="payment_method" id="edit_method" style="flex: 1;">
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Chuyển khoản">Chuyển khoản</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Loại giao dịch:</label>
-                    <select name="transaction_type" id="edit_type">
-                        <option value="Registration">Đăng ký mới</option>
-                        <option value="Renewal">Gia hạn</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Phương thức thanh toán:</label>
-                    <select name="payment_method" id="edit_method">
-                        <option value="Tiền mặt">Tiền mặt</option>
-                        <option value="Chuyển khoản">Chuyển khoản</option>
-                        <option value="Momo">Momo</option>
-                    </select>
-                </div>
+
                 <div class="modal-footer">
                     <button type="button" class="close-modal">Hủy</button>
                     <button type="submit" name="btn_update" class="btn-save" style="background: #3498db;">Cập nhật thay đổi</button>
@@ -244,12 +253,25 @@ $recent_transactions = $conn->query($sql_recent);
         </div>
     </div>
 
-    <script src="admin_dashboard.js"></script>
+    <script src="admin_dashboard.js?v=1.2"></script>
+    
     <?php if(isset($_GET['msg'])): ?>
         <script>
-            const msgs = {success: 'Thêm thành công!', updated: 'Cập nhật thành công!', deleted: 'Đã xóa!', error: 'Có lỗi xảy ra!'};
-            alert(msgs['<?= $_GET['msg'] ?>'] || 'Thông báo');
-        </script>
+            const msgs = {
+                'success': 'Giao dịch đã được lưu thành công!',
+                'updated': 'Đã cập nhật thay đổi thành công!',
+                'deleted': 'Đã xóa giao dịch và cập nhật lại hạn dùng!',
+                'error': 'Có lỗi hệ thống xảy ra!',
+                'error_renewal_new': 'Không thể gia hạn cho người chưa từng đăng ký!',
+                'error_reg_exists': 'Hội viên đã đăng ký rồi. Không thể đăng ký!',
+                'error_renewal_not_found': 'Không tìm thấy dữ liệu gốc để gia hạn!',
+                'error_multiple_reg': 'Một hội viên không thể có 2 giao dịch Đăng ký!'
+            };
+            const msgKey = '<?= $_GET['msg'] ?>';
+            if (msgs[msgKey]) {
+                alert(msgs[msgKey]);
+            }
+        </script>   
     <?php endif; ?>
 </body>
 </html>

@@ -1,88 +1,139 @@
+let currentMemberExpiry = null;
+
 document.addEventListener("DOMContentLoaded", function () {
-  // 1. KHAI BÁO CÁC BIẾN (Dùng chung)
   const addModal = document.getElementById("addTransactionModal");
   const editModal = document.getElementById("editTransactionModal");
   const btnOpenAdd = document.getElementById("btnOpenModal");
   const memberSelect = document.getElementById("memberSelect");
   const newNameGroup = document.getElementById("newNameGroup");
   const newMemberName = document.getElementById("newMemberName");
-  const editTriggers = document.querySelectorAll(".btn-edit-trigger");
-  const closeBtns = document.querySelectorAll(".close-modal");
+  const addType = document.getElementById("add_transaction_type");
 
-  // 2. CHỨC NĂNG MỞ MODAL THÊM
-  if (btnOpenAdd) {
-    btnOpenAdd.onclick = function () {
-      addModal.style.display = "flex";
-    };
-  }
-
-  // 3. CHỨC NĂNG MỞ MODAL SỬA & ĐỔ DỮ LIỆU
-  editTriggers.forEach((trigger) => {
-    trigger.onclick = function () {
-      // Lấy dữ liệu từ thuộc tính data-*
-      const data = {
-        id: this.getAttribute("data-id"),
-        memberId: this.getAttribute("data-memberid"),
-        type: this.getAttribute("data-type"),
-        amount: this.getAttribute("data-amount"),
-        method: this.getAttribute("data-method"),
-        endDate: this.getAttribute("data-enddate"),
-      };
-
-      // Đổ dữ liệu vào Form Sửa
-      document.getElementById("display_edit_id").innerText = data.id;
-      document.getElementById("edit_trans_id").value = data.id;
-      document.getElementById("edit_member_id").value = data.memberId;
-      document.getElementById("edit_amount").value = data.amount;
-      document.getElementById("edit_type").value = data.type;
-      document.getElementById("edit_method").value = data.method;
-      document.getElementById("edit_end_date").value = data.endDate;
-
-      // Hiển thị modal sửa
-      editModal.style.display = "flex";
-    };
-  });
-
-  // 4. CHỨC NĂNG THOÁT (Dùng chung cho cả 2 Modal)
-
-  // Đóng bằng nút X hoặc nút Hủy
-  closeBtns.forEach((btn) => {
-    btn.onclick = function () {
-      addModal.style.display = "none";
-      editModal.style.display = "none";
-    };
-  });
-
-  // Đóng khi bấm ra ngoài vùng xám (Overlay)
-  window.onclick = function (event) {
-    if (event.target == addModal) {
-      addModal.style.display = "none";
-    }
-    if (event.target == editModal) {
-      editModal.style.display = "none";
-    }
-  };
-
-  // Đóng khi nhấn phím ESC
-  document.onkeydown = function (event) {
-    if (event.key === "Escape") {
-      addModal.style.display = "none";
-      editModal.style.display = "none";
-    }
-  };
-
-  // 5. XỬ LÝ HIỆN/ẨN Ô NHẬP TÊN (Khi thêm mới)
   if (memberSelect) {
-    memberSelect.onchange = function () {
+    memberSelect.addEventListener("change", function () {
       if (this.value === "new_member") {
         newNameGroup.style.display = "block";
         newMemberName.setAttribute("required", "required");
-        newMemberName.focus();
+        if (addType) addType.value = "Registration";
+        currentMemberExpiry = null;
       } else {
         newNameGroup.style.display = "none";
         newMemberName.removeAttribute("required");
         newMemberName.value = "";
+
+        const selectedMemberId = this.value;
+        if (selectedMemberId) {
+          fetch(`get_member_expiry.php?member_id=${selectedMemberId}`)
+            .then((res) => res.json())
+            .then((data) => {
+              currentMemberExpiry = data.end_date;
+              calculateExpiry("add");
+            });
+        }
       }
+      calculateExpiry("add");
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".btn-edit-trigger");
+    if (btn) {
+      e.preventDefault();
+      const id = btn.getAttribute("data-id");
+      const memberId = btn.getAttribute("data-memberid");
+      const type = btn.getAttribute("data-type");
+      const amount = btn.getAttribute("data-amount");
+
+      document.getElementById("display_edit_id").innerText = id;
+      document.getElementById("edit_trans_id").value = id;
+      document.getElementById("edit_member_id").value = memberId;
+      document.getElementById("edit_type").value = type;
+      document.getElementById("edit_amount_select").value = amount;
+
+      fetch(`get_member_expiry.php?member_id=${memberId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          currentMemberExpiry = data.end_date;
+          calculateExpiry("edit");
+          editModal.style.display = "flex";
+        })
+        .catch((err) => {
+          editModal.style.display = "flex";
+        });
+    }
+  });
+
+  const addAmount = document.getElementById("amountSelect");
+  const editAmount = document.getElementById("edit_amount_select");
+  const editType = document.getElementById("edit_type");
+
+  if (addAmount) addAmount.onchange = () => calculateExpiry("add");
+  if (addType) addType.onchange = () => calculateExpiry("add");
+  if (editAmount) editAmount.onchange = () => calculateExpiry("edit");
+  if (editType) editType.onchange = () => calculateExpiry("edit");
+
+  if (btnOpenAdd) {
+    btnOpenAdd.onclick = () => {
+      if (memberSelect) memberSelect.value = "";
+      if (newNameGroup) newNameGroup.style.display = "none";
+      addModal.style.display = "flex";
     };
   }
+
+  document.querySelectorAll(".close-modal").forEach((btn) => {
+    btn.onclick = () => {
+      addModal.style.display = "none";
+      editModal.style.display = "none";
+    };
+  });
+
+  window.onclick = (e) => {
+    if (e.target == addModal) addModal.style.display = "none";
+    if (e.target == editModal) editModal.style.display = "none";
+  };
 });
+
+function calculateExpiry(mode) {
+  const amountSelect =
+    mode === "add"
+      ? document.getElementById("amountSelect")
+      : document.getElementById("edit_amount_select");
+  const endDateInput =
+    mode === "add"
+      ? document.getElementById("add_end_date")
+      : document.getElementById("edit_end_date");
+  const typeSelect =
+    mode === "add"
+      ? document.getElementById("add_transaction_type")
+      : document.getElementById("edit_type");
+
+  if (!amountSelect || !endDateInput || !typeSelect) return;
+
+  const transType = typeSelect.value;
+  const selectedOption = amountSelect.options[amountSelect.selectedIndex];
+  if (!selectedOption || !selectedOption.getAttribute("data-months")) {
+    endDateInput.value = "";
+    return;
+  }
+
+  const months = parseInt(selectedOption.getAttribute("data-months"));
+
+  if (months) {
+    let startDate = new Date();
+    if (transType === "Renewal" && currentMemberExpiry) {
+      let oldDate = new Date(currentMemberExpiry);
+      if (oldDate > startDate) startDate = oldDate;
+    }
+
+    let resultDate = new Date(startDate);
+    resultDate.setMonth(resultDate.getMonth() + months);
+
+    const yyyy = resultDate.getFullYear();
+    const mm = String(resultDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(resultDate.getDate()).padStart(2, "0");
+
+    endDateInput.value = `${yyyy}-${mm}-${dd}`;
+    endDateInput.style.backgroundColor =
+      transType === "Renewal" ? "#d4edda" : "#e8f4fd";
+  }
+}
