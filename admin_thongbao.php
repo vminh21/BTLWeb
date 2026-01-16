@@ -1,14 +1,22 @@
 <?php
 session_start();
+
 // 1. KẾT NỐI DATABASE
 include("../QL_Profile/connectdb.php");
 
-// 2. XỬ LÝ LOGIC CRUD
 $status_msg = "";
 
 // --- CHỨC NĂNG XÓA ---
 if (isset($_GET['delete_id'])) {
     $id = (int)$_GET['delete_id'];
+    
+    // Xóa ảnh trong thư mục assets trước khi xóa bản ghi trong DB (để sạch server)
+    $res_old = mysqli_query($conn, "SELECT image FROM notifications WHERE notification_id = $id");
+    $old_img = mysqli_fetch_assoc($res_old);
+    if (!empty($old_img['image']) && file_exists("../assets/" . $old_img['image'])) {
+        unlink("../assets/" . $old_img['image']);
+    }
+
     $sql_delete = "DELETE FROM notifications WHERE notification_id = $id";
     if (mysqli_query($conn, $sql_delete)) {
         header("Location: admin_thongbao.php?msg=deleted");
@@ -16,37 +24,48 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
-// --- CHỨC NĂNG THÊM HOẶC SỬA ---
+// --- CHỨC NĂNG LƯU / CẬP NHẬT ---
 if (isset($_POST['btn_save'])) {
     $title = mysqli_real_escape_string($conn, $_POST['title']);
     $content = mysqli_real_escape_string($conn, $_POST['content']);
     $notif_id = isset($_POST['notification_id']) ? (int)$_POST['notification_id'] : 0;
     $admin_id = $_SESSION['admin_id'] ?? 1;
-
-    // Xử lý Upload ảnh
     $image_query = "";
+    $image_name = ""; // Khởi tạo rỗng để tránh lỗi NOT NULL trong database
+
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $image_name = time() . "_" . basename($_FILES["image"]["name"]);
-        move_uploaded_file($_FILES["image"]["tmp_name"], "../assets/" . $image_name);
-        $image_query = ", image = '$image_name'";
+        $file_name = $_FILES['image']['name'];
+        $ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+        $allowed = array("jpg", "jpeg", "png");
+
+        if (in_array($ext, $allowed)) {
+            $image_name = time() . "_" . basename($file_name);
+            move_uploaded_file($_FILES["image"]["tmp_name"], "../assets/" . $image_name);
+            $image_query = ", image = '$image_name'";
+        } else {
+            echo "<script>alert('Lỗi: Chỉ chấp nhận ảnh định dạng JPG, JPEG hoặc PNG!'); window.history.back();</script>";
+            exit();
+        }
     }
 
     if ($notif_id > 0) {
-        // CẬP NHẬT (SỬA)
+        // TRƯỜNG HỢP CẬP NHẬT (SỬA)
         $sql = "UPDATE notifications SET title='$title', content='$content' $image_query WHERE notification_id=$notif_id";
     } else {
-        // THÊM MỚI
-        $final_image = ($image_query != "") ? "'$image_name'" : "NULL";
-        $sql = "INSERT INTO notifications (title, content, image, created_by) VALUES ('$title', '$content', $final_image, '$admin_id')";
+        // TRƯỜNG HỢP THÊM MỚI (Sửa lỗi Column cannot be null bằng cách truyền '$image_name')
+        $sql = "INSERT INTO notifications (title, content, image, created_by) 
+                VALUES ('$title', '$content', '$image_name', '$admin_id')";
     }
 
     if (mysqli_query($conn, $sql)) {
         header("Location: admin_thongbao.php?msg=success");
         exit();
+    } else {
+        die("Lỗi SQL: " . mysqli_error($conn));
     }
 }
 
-// Lấy thông tin để sửa (nếu có)
+// --- LẤY DỮ LIỆU ĐỂ SỬA ---
 $edit_data = null;
 if (isset($_GET['edit_id'])) {
     $edit_id = (int)$_GET['edit_id'];
@@ -54,7 +73,7 @@ if (isset($_GET['edit_id'])) {
     $edit_data = mysqli_fetch_assoc($res_edit);
 }
 
-// 3. LẤY DANH SÁCH HIỂN THỊ
+// LẤY DANH SÁCH THÔNG BÁO ĐỂ HIỂN THỊ
 $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at DESC");
 ?>
 
@@ -71,8 +90,9 @@ $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at D
         .full-width { grid-column: span 2; }
         textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; }
         .btn-submit { background: #ff6b6b; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 15px; }
-        .btn-cancel { background: #eee; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 8px; display: inline-block; }
+        .btn-cancel { background: #eee; color: #333; text-decoration: none; padding: 12px 25px; border-radius: 8px; display: inline-block; margin-top: 15px; }
         .img-preview { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -99,23 +119,23 @@ $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at D
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Tiêu đề thông báo</label>
-                        <input type="text" name="title" value="<?php echo $edit_data['title'] ?? ''; ?>" required placeholder="Nhập tiêu đề...">
+                        <input type="text" name="title" value="<?php echo htmlspecialchars($edit_data['title'] ?? ''); ?>" required placeholder="Nhập tiêu đề...">
                     </div>
                     <div class="form-group">
-                        <label>Hình ảnh (Để trống nếu dùng mặc định)</label>
-                        <input type="file" name="image" accept="image/*">
+                        <label>Hình ảnh (Chấp nhận .jpg, .png)</label>
+                        <input type="file" name="image" accept=".jpg, .jpeg, .png">
                     </div>
                     <div class="form-group full-width">
                         <label>Nội dung thông báo</label>
-                        <textarea name="content" rows="5" required placeholder="Nhập nội dung chi tiết..."><?php echo $edit_data['content'] ?? ''; ?></textarea>
+                        <textarea name="content" rows="5" required placeholder="Nhập nội dung chi tiết..."><?php echo htmlspecialchars($edit_data['content'] ?? ''); ?></textarea>
                     </div>
                 </div>
-                <div style="margin-top: 20px;">
+                <div style="display: flex; gap: 10px;">
                     <button type="submit" name="btn_save" class="btn-submit">
                         <i class='bx bx-save'></i> <?php echo $edit_data ? 'Cập nhật' : 'Đăng thông báo'; ?>
                     </button>
                     <?php if($edit_data): ?>
-                        <a href="admin_thongbao.php" class="btn-cancel">Hủy</a>
+                        <a href="admin_thongbao.php" class="btn-cancel">Hủy sửa</a>
                     <?php endif; ?>
                 </div>
             </form>
@@ -137,7 +157,10 @@ $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at D
                     <?php while($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td>
-                            <img src="../assets/<?php echo ($row['image'] && $row['image'] != 'NULL') ? $row['image'] : 'banner-3.png'; ?>" class="img-preview">
+                            <?php 
+                                $img_path = (!empty($row['image']) && $row['image'] != 'NULL') ? $row['image'] : 'banner-3.png';
+                            ?>
+                            <img src="../assets/<?php echo $img_path; ?>" class="img-preview">
                         </td>
                         <td class="name-col"><?php echo htmlspecialchars($row['title']); ?></td>
                         <td><?php echo date("d/m/Y", strtotime($row['created_at'])); ?></td>
@@ -154,9 +177,11 @@ $result = mysqli_query($conn, "SELECT * FROM notifications ORDER BY created_at D
     </div>
 
     <script>
-        // Tự động ẩn thông báo sau 3 giây
+        // Tự động xóa thông báo thành công khỏi URL để không bị lặp lại khi F5
         if(window.location.search.includes('msg')) {
-            setTimeout(() => { window.history.replaceState({}, document.title, "admin_thongbao.php"); }, 3000);
+            setTimeout(() => { 
+                window.history.replaceState({}, document.title, "admin_thongbao.php"); 
+            }, 3000);
         }
     </script>
 </body>
