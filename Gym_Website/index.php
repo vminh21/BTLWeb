@@ -416,7 +416,7 @@ $chat_greeting = "Chào bạn";
             </div>
           </div>
           <div class="footer__bar">
-            Copyright © 2024 Web Design Mastery. All rights reserved.
+            Copyright © 2026 Web Design Mastery. All rights reserved.
           </div>
         </footer>
         <div class="chat-toggle-btn" onclick="toggleChat()">
