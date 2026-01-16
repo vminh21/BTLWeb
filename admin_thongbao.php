@@ -1,12 +1,12 @@
 <?php
 session_start();
 
-// 1. KẾT NỐI DATABASE
+
 include("../QL_Profile/connectdb.php");
 
 $status_msg = "";
 
-// --- CHỨC NĂNG XÓA ---
+
 if (isset($_GET['delete_id'])) {
     $id = (int)$_GET['delete_id'];
     
@@ -24,14 +24,14 @@ if (isset($_GET['delete_id'])) {
     }
 }
 
-// --- CHỨC NĂNG LƯU / CẬP NHẬT ---
+
 if (isset($_POST['btn_save'])) {
     $title = mysqli_real_escape_string($conn, $_POST['title']);
     $content = mysqli_real_escape_string($conn, $_POST['content']);
     $notif_id = isset($_POST['notification_id']) ? (int)$_POST['notification_id'] : 0;
     $admin_id = $_SESSION['admin_id'] ?? 1;
     $image_query = "";
-    $image_name = ""; // Khởi tạo rỗng để tránh lỗi NOT NULL trong database
+    $image_name = ""; 
 
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
         $file_name = $_FILES['image']['name'];
@@ -52,7 +52,7 @@ if (isset($_POST['btn_save'])) {
         // TRƯỜNG HỢP CẬP NHẬT (SỬA)
         $sql = "UPDATE notifications SET title='$title', content='$content' $image_query WHERE notification_id=$notif_id";
     } else {
-        // TRƯỜNG HỢP THÊM MỚI (Sửa lỗi Column cannot be null bằng cách truyền '$image_name')
+        // TRƯỜNG HỢP THÊM MỚI 
         $sql = "INSERT INTO notifications (title, content, image, created_by) 
                 VALUES ('$title', '$content', '$image_name', '$admin_id')";
     }
@@ -65,7 +65,7 @@ if (isset($_POST['btn_save'])) {
     }
 }
 
-// --- LẤY DỮ LIỆU ĐỂ SỬA ---
+// LẤY DỮ LIỆU ĐỂ SỬA 
 $edit_data = null;
 if (isset($_GET['edit_id'])) {
     $edit_id = (int)$_GET['edit_id'];
